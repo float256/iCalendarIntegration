@@ -1,0 +1,63 @@
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-white pb-0 pl-0">
+    <li class="breadcrumb-item" aria-current="page">
+      <a routerLink="/">Home</a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">Hotel#{{hotelId}}</li>
+  </ol>
+</nav>
+<p class="h3 mb-4">Hotel#{{hotelId}}</p>
+<div class="pb-4 d-flex align-items-center">
+  <p class="h5 mr-4 pr-2">Rooms</p>
+  <a routerLink="/Room/Add/{{hotelId}}" class="btn btn-primary btn-sm" role="button" aria-disabled="true">+ Add room</a>
+</div>
+<div class="list-group">
+  <div class="list-group-item d-flex justify-content-between py-0 pr-0">
+    <a routerLink="/Room/Edit/1" class="row py-2 pl-3 br-1 w-100 border-right">Room #1</a>
+    <div class="dropleft ml-auto w-auto row">
+      <button class="btn shadow-none mt-auto mb-auto mx-3" id="room1DropdownMenu" data-toggle="dropdown">
+        <i class="fas fa-ellipsis-v"></i>
+      </button>
+      <div class="dropdown-menu rounded-0" aria-labelledby="room1DropdownMenu">
+        <a class="dropdown-item" routerLink="/Room/Edit/1">Edit</a>
+        <a class="dropdown-item" routerLink="/Room/Delete/1">Delete</a>
+      </div>
+    </div>
+  </div>
+  <div class="list-group-item d-flex justify-content-between py-0 pr-0">
+    <a routerLink="/Room/Edit/2" class="row py-2 pl-3 br-1 w-100 border-right">Room #2</a>
+    <div class="dropleft ml-auto w-auto row">
+      <button class="btn shadow-none mt-auto mb-auto mx-3" id="room2DropdownMenu" data-toggle="dropdown">
+        <i class="fas fa-ellipsis-v"></i>
+      </button>
+      <div class="dropdown-menu rounded-0" aria-labelledby="room2DropdownMenu">
+        <a class="dropdown-item" routerLink="/Room/Edit/2">Edit</a>
+        <a class="dropdown-item" routerLink="/Room/Delete/2">Delete</a>
+      </div>
+    </div>
+  </div>
+  <div class="list-group-item d-flex justify-content-between py-0 pr-0">
+    <a routerLink="/Room/Edit/3" class="row py-2 pl-3 br-1 w-100 border-right">Room #3</a>
+    <div class="dropleft ml-auto w-auto row">
+      <button class="btn shadow-none mt-auto mb-auto mx-3" id="room3DropdownMenu" data-toggle="dropdown">
+        <i class="fas fa-ellipsis-v"></i>
+      </button>
+      <div class="dropdown-menu rounded-0" aria-labelledby="room3DropdownMenu">
+        <a class="dropdown-item" routerLink="/Room/Edit/3">Edit</a>
+        <a class="dropdown-item" routerLink="/Room/Delete/3">Delete</a>
+      </div>
+    </div>
+  </div>
+  <div class="list-group-item d-flex justify-content-between py-0 pr-0">
+    <a routerLink="/Room/Edit/4" class="row py-2 pl-3 br-1 w-100 border-right">Room #4</a>
+    <div class="dropleft ml-auto w-auto row">
+      <button class="btn shadow-none mt-auto mb-auto mx-3" id="room4DropdownMenu" data-toggle="dropdown">
+        <i class="fas fa-ellipsis-v"></i>
+      </button>
+      <div class="dropdown-menu rounded-0" aria-labelledby="room4DropdownMenu">
+        <a class="dropdown-item" routerLink="/Room/Edit/4">Edit</a>
+        <a class="dropdown-item" routerLink="/Room/Delete/4">Delete</a>
+      </div>
+    </div>
+  </div>
+</div>
