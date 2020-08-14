@@ -34,7 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
+    <ProjectReference Include="..\CalendarIntegrationCore\CalendarIntegrationCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>
