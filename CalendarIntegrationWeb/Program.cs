@@ -1,6 +1,10 @@
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.ServiceFabric.Services.Runtime;
+using NLog;
+using NLog.Web;
 using System;
 using System.Diagnostics;
 using System.Threading;
@@ -16,13 +20,31 @@ namespace CalendarIntegrationWeb
         private static void Main(string[] args)
         {
             string appWorkingMode = Environment.GetEnvironmentVariable("APP_WORKING_MODE");
-            if (appWorkingMode == "Console")
+            string envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            IConfigurationRoot config = new ConfigurationBuilder()
+                .AddJsonFile(path: $"appsettings.{envName}.json").Build();
+            NLog.Extensions.Logging.ConfigSettingLayoutRenderer.DefaultConfiguration = config;
+            var logger = NLog.Web.NLogBuilder.ConfigureNLog("NLog.config").GetCurrentClassLogger();
+            try
             {
-                StartWebHost(args);
+                logger.Debug("Starting application");
+                if (appWorkingMode == "Console")
+                {
+                    StartWebHost(args);
+                }
+                else
+                {
+                    StartService();
+                }
             }
-            else
+            catch (Exception exception)
             {
-                StartService();
+                logger.Error(exception, "Stopped program because of exception");
+                throw;
+            }
+            finally
+            {
+                NLog.LogManager.Shutdown();
             }
         }
 
@@ -56,7 +78,12 @@ namespace CalendarIntegrationWeb
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                });
+                })
+                .ConfigureLogging(logger =>
+                {
+                    logger.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
+                })
+                .UseNLog();
             hostBuilder.Build().Run();
         }
     }
