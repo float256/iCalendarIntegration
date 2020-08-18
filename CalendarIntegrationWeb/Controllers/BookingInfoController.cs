@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services.Repositories;
+using CalendarIntegrationWeb.Dto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,10 +26,16 @@ namespace CalendarIntegrationWeb.Controllers
         [HttpGet("{id:int}")]
         public ActionResult<BookingInfo> Get(int id)
         {
-            BookingInfo result = _bookingInfoRepository.Get(id);
-            if (result != default)
+            BookingInfo bookingInfo = _bookingInfoRepository.Get(id);
+            if (bookingInfo != default)
             {
-                return Ok(result);
+                return Ok(new BookingInfoDto
+                {
+                    Id = bookingInfo.Id,
+                    StartBooking = bookingInfo.StartBooking,
+                    EndBooking = bookingInfo.EndBooking,
+                    RoomId = bookingInfo.RoomId
+                });
             }
             else
             {
@@ -37,15 +44,30 @@ namespace CalendarIntegrationWeb.Controllers
         }
 
         [HttpGet("GetAll")]
-        public ActionResult<BookingInfo> GetAll()
+        public ActionResult<BookingInfoDto> GetAll()
         {
-            return Ok(_bookingInfoRepository.GetAll());
+            List<BookingInfoDto> allBookingInfo = _bookingInfoRepository.GetAll().Select(
+                elem => new BookingInfoDto
+                {
+                    Id = elem.Id,
+                    StartBooking = elem.StartBooking,
+                    EndBooking = elem.EndBooking,
+                    RoomId = elem.RoomId
+                }).ToList();
+            return Ok(allBookingInfo);
         }
 
         [HttpGet("GetByRoomId/{roomId:int}")]
-        public ActionResult<List<BookingInfo>> GetAllForRoom(int roomId)
+        public ActionResult<List<BookingInfoDto>> GetAllForRoom(int roomId)
         {
-            List<BookingInfo> result = _bookingInfoRepository.GetByRoomId(roomId);
+            List<BookingInfoDto> result = _bookingInfoRepository.GetByRoomId(roomId).Select(
+                elem => new BookingInfoDto 
+                {
+                    Id = elem.Id,
+                    StartBooking = elem.StartBooking,
+                    EndBooking = elem.EndBooking,
+                    RoomId = elem.RoomId
+                }).ToList();
             if (result.Count > 0)
             {
                 return Ok(result);
@@ -57,10 +79,17 @@ namespace CalendarIntegrationWeb.Controllers
         }
 
         [HttpPost("Add")]
-        public ActionResult<BookingInfo> Add(BookingInfo bookingInfo)
+        public ActionResult<BookingInfo> Add(BookingInfoDto bookingInfoDto)
         {
-            if (_roomRepository.Get(bookingInfo.RoomId) != default)
+            if (_roomRepository.Get(bookingInfoDto.RoomId) != default)
             {
+                BookingInfo bookingInfo = new BookingInfo
+                {
+                    Id = bookingInfoDto.Id,
+                    EndBooking = bookingInfoDto.EndBooking,
+                    StartBooking = bookingInfoDto.StartBooking,
+                    RoomId = bookingInfoDto.RoomId
+                };
                 _bookingInfoRepository.Add(bookingInfo);
                 return Ok(bookingInfo);
             }
@@ -71,9 +100,15 @@ namespace CalendarIntegrationWeb.Controllers
         }
 
         [HttpPost("Update")]
-        public void Update(BookingInfo bookingInfo)
+        public void Update(BookingInfoDto bookingInfoDto)
         {
-            _bookingInfoRepository.Update(bookingInfo);
+            _bookingInfoRepository.Update(new BookingInfo
+            {
+                Id = bookingInfoDto.Id,
+                EndBooking = bookingInfoDto.EndBooking,
+                StartBooking = bookingInfoDto.StartBooking,
+                RoomId = bookingInfoDto.RoomId
+            });
         }
 
         [HttpPost("Delete")]

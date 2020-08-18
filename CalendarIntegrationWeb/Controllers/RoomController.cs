@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services;
 using CalendarIntegrationCore.Services.Repositories;
+using CalendarIntegrationWeb.Dto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,12 +25,19 @@ namespace CalendarIntegrationWeb.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public ActionResult<Room> Get(int id)
+        public ActionResult<RoomDto> Get(int id)
         {
-            Room result = _roomRepository.Get(id);
-            if (result != default)
+            Room room = _roomRepository.Get(id);
+            if (room != default)
             {
-                return Ok(result);
+                return Ok(new RoomDto
+                {
+                    Id = room.Id,
+                    HotelId = room.HotelId,
+                    Name = room.Name,
+                    TLApiCode = room.TLApiCode,
+                    Url = room.Url
+                });
             }
             else
             {
@@ -40,7 +48,15 @@ namespace CalendarIntegrationWeb.Controllers
         [HttpGet("GetByHotelId/{hotelId:int}")]
         public ActionResult<List<Room>> GetByHotelId(int hotelId)
         {
-            List<Room> result = _roomRepository.GetByHotelId(hotelId);
+            List<RoomDto> result = _roomRepository.GetByHotelId(hotelId).Select(
+                room => new RoomDto
+                {
+                    Id = room.Id,
+                    HotelId = room.HotelId,
+                    Name = room.Name,
+                    TLApiCode = room.TLApiCode,
+                    Url = room.Url
+                }).ToList();
             if (result.Count > 0)
             {
                 return Ok(result);
@@ -52,16 +68,31 @@ namespace CalendarIntegrationWeb.Controllers
         }
 
         [HttpGet("GetAll")]
-        public ActionResult<List<Room>> GetAll()
+        public ActionResult<List<RoomDto>> GetAll()
         {
-            return _roomRepository.GetAll();
+            return _roomRepository.GetAll().Select(
+                room => new RoomDto
+                {
+                    Id = room.Id,
+                    HotelId = room.HotelId,
+                    Name = room.Name,
+                    TLApiCode = room.TLApiCode,
+                    Url = room.Url
+                }).ToList();
         }
 
         [HttpPost("Add")]
-        public ActionResult<Room> Add(Room room)
+        public ActionResult<RoomDto> Add(RoomDto roomDto)
         {
-            if (_hotelRepository.Get(room.HotelId) != default)
+            if (_hotelRepository.Get(roomDto.HotelId) != default)
             {
+                Room room = new Room
+                {
+                    HotelId = roomDto.HotelId,
+                    Name = roomDto.Name,
+                    TLApiCode = roomDto.TLApiCode,
+                    Url = roomDto.Url
+                };
                 _roomRepository.Add(room);
                 return Ok(room);
             }
@@ -72,9 +103,16 @@ namespace CalendarIntegrationWeb.Controllers
         }
 
         [HttpPost("Update")]
-        public void Update(Room room)
+        public void Update(RoomDto roomDto)
         {
-            _roomRepository.Update(room);
+            _roomRepository.Update(new Room
+            {
+                Id = roomDto.Id,
+                HotelId = roomDto.HotelId,
+                Name = roomDto.Name,
+                TLApiCode = roomDto.TLApiCode,
+                Url = roomDto.Url
+            });
         }
 
         [HttpPost("Delete")]

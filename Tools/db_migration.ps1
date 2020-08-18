@@ -24,7 +24,7 @@ $currDir = Split-Path $MyInvocation.MyCommand.Path -Parent
 function GetUtilParams($env, $settingsName) {
     $connStrName    = $dbSettings[$settingsName].connStrName;
     $dir            = $dbSettings[$settingsName].dir;
-    $path           = $dbSettings[$settingsName].path;
+    $path           = $dbSettings[$settingsName].localPath;
 
     $appEnvConfigurationFilePath = "$basePath\$path\appsettings.$env.json";
     $sharedEnvConfigurationFilePath = "$basePath\SharedConfiguration\sharedSettings.$env.json";

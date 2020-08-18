@@ -12,16 +12,14 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
-        "APP_WORKING_MODE": "Console",
-        "ASPNETCORE_ENVIRONMENT": "Production"
+        "APP_WORKING_MODE": "Console"
       }
     },
     "CalendarIntegrationWeb": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "APP_WORKING_MODE": "Console",
-        "ASPNETCORE_ENVIRONMENT": "Production"
+        "APP_WORKING_MODE": "Console"
       },
       "applicationUrl": "http://localhost:5000"
     }

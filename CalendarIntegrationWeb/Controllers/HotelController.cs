@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services;
 using CalendarIntegrationCore.Services.Repositories;
+using CalendarIntegrationWeb.Dto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,10 +25,17 @@ namespace CalendarIntegrationWeb.Controllers
         [HttpGet("{id:int}")]
         public ActionResult<Hotel> Get(int id)
         {
-            Hotel result = _hotelRepository.Get(id);
-            if (result != default)
+            Hotel hotel = _hotelRepository.Get(id);
+            if (hotel != default)
             {
-                return Ok(result);
+                return Ok(new HotelDto
+                {
+                    Id = hotel.Id,
+                    HotelCode = hotel.HotelCode,
+                    Login = hotel.Login,
+                    Name = hotel.Name,
+                    Password = hotel.Password
+                });
             }
             else
             {
@@ -36,22 +44,45 @@ namespace CalendarIntegrationWeb.Controllers
         }
 
         [HttpGet("GetAll")]
-        public ActionResult<List<Hotel>> GetAll()
+        public ActionResult<List<HotelDto>> GetAll()
         {
-            return _hotelRepository.GetAll();
+            return _hotelRepository.GetAll().Select(
+                elem => new HotelDto
+                {
+                    Id = elem.Id,
+                    HotelCode = elem.HotelCode,
+                    Login = elem.Login,
+                    Name = elem.Name,
+                    Password = elem.Password
+                }).ToList();
         }
 
         [HttpPost("Add")]
-        public ActionResult<Hotel> Add(Hotel hotel)
+        public ActionResult<Hotel> Add(HotelDto hotelDto)
         {
+            Hotel hotel = new Hotel
+            {
+                Id = hotelDto.Id,
+                HotelCode = hotelDto.HotelCode,
+                Login = hotelDto.Login,
+                Name = hotelDto.Name,
+                Password = hotelDto.Password
+            };
             _hotelRepository.Add(hotel);
             return Ok(hotel);
         }
 
         [HttpPost("Update")]
-        public void Update(Hotel hotel)
+        public void Update(HotelDto hotelDto)
         {
-            _hotelRepository.Update(hotel);
+            _hotelRepository.Update(new Hotel
+            {
+                Id = hotelDto.Id,
+                HotelCode = hotelDto.HotelCode,
+                Login = hotelDto.Login,
+                Name = hotelDto.Name,
+                Password = hotelDto.Password
+            });
         }
 
         [HttpPost("Delete")]
