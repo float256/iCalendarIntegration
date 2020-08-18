@@ -3,18 +3,54 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30225.117
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalendarIntegrationWeb", "CalendarIntegrationWeb\CalendarIntegrationWeb.csproj", "{8C37A092-9E8E-45CD-AB7D-C2D2C7B54BE0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CalendarIntegrationCore", "CalendarIntegrationCore\CalendarIntegrationCore.csproj", "{19A4F534-E0C0-41D5-A208-DA7E91CD8A86}"
+EndProject
+Project("{A07B5EB6-E848-4116-A8D0-A826331D98C6}") = "CalendarIntegration", "CalendarIntegration\CalendarIntegration.sfproj", "{98C59227-D8AD-4CA1-AC2F-52132C8FDF82}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CalendarIntegrationWeb", "CalendarIntegrationWeb\CalendarIntegrationWeb.csproj", "{B7F29FEB-CAE6-455A-9ABC-15C76C492851}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalendarIntegrationCore.Tests", "CalendarIntegrationCore.Tests\CalendarIntegrationCore.Tests.csproj", "{775B9DE1-D15F-450A-B6CA-91D5E65F37F6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8C37A092-9E8E-45CD-AB7D-C2D2C7B54BE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8C37A092-9E8E-45CD-AB7D-C2D2C7B54BE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8C37A092-9E8E-45CD-AB7D-C2D2C7B54BE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8C37A092-9E8E-45CD-AB7D-C2D2C7B54BE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19A4F534-E0C0-41D5-A208-DA7E91CD8A86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19A4F534-E0C0-41D5-A208-DA7E91CD8A86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19A4F534-E0C0-41D5-A208-DA7E91CD8A86}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{19A4F534-E0C0-41D5-A208-DA7E91CD8A86}.Debug|x64.Build.0 = Debug|Any CPU
+		{19A4F534-E0C0-41D5-A208-DA7E91CD8A86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19A4F534-E0C0-41D5-A208-DA7E91CD8A86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19A4F534-E0C0-41D5-A208-DA7E91CD8A86}.Release|x64.ActiveCfg = Release|Any CPU
+		{19A4F534-E0C0-41D5-A208-DA7E91CD8A86}.Release|x64.Build.0 = Release|Any CPU
+		{98C59227-D8AD-4CA1-AC2F-52132C8FDF82}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{98C59227-D8AD-4CA1-AC2F-52132C8FDF82}.Debug|x64.ActiveCfg = Debug|x64
+		{98C59227-D8AD-4CA1-AC2F-52132C8FDF82}.Debug|x64.Build.0 = Debug|x64
+		{98C59227-D8AD-4CA1-AC2F-52132C8FDF82}.Debug|x64.Deploy.0 = Debug|x64
+		{98C59227-D8AD-4CA1-AC2F-52132C8FDF82}.Release|Any CPU.ActiveCfg = Release|x64
+		{98C59227-D8AD-4CA1-AC2F-52132C8FDF82}.Release|x64.ActiveCfg = Release|x64
+		{98C59227-D8AD-4CA1-AC2F-52132C8FDF82}.Release|x64.Build.0 = Release|x64
+		{98C59227-D8AD-4CA1-AC2F-52132C8FDF82}.Release|x64.Deploy.0 = Release|x64
+		{B7F29FEB-CAE6-455A-9ABC-15C76C492851}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7F29FEB-CAE6-455A-9ABC-15C76C492851}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7F29FEB-CAE6-455A-9ABC-15C76C492851}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B7F29FEB-CAE6-455A-9ABC-15C76C492851}.Debug|x64.Build.0 = Debug|Any CPU
+		{B7F29FEB-CAE6-455A-9ABC-15C76C492851}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7F29FEB-CAE6-455A-9ABC-15C76C492851}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7F29FEB-CAE6-455A-9ABC-15C76C492851}.Release|x64.ActiveCfg = Release|Any CPU
+		{B7F29FEB-CAE6-455A-9ABC-15C76C492851}.Release|x64.Build.0 = Release|Any CPU
+		{775B9DE1-D15F-450A-B6CA-91D5E65F37F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{775B9DE1-D15F-450A-B6CA-91D5E65F37F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{775B9DE1-D15F-450A-B6CA-91D5E65F37F6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{775B9DE1-D15F-450A-B6CA-91D5E65F37F6}.Debug|x64.Build.0 = Debug|Any CPU
+		{775B9DE1-D15F-450A-B6CA-91D5E65F37F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{775B9DE1-D15F-450A-B6CA-91D5E65F37F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{775B9DE1-D15F-450A-B6CA-91D5E65F37F6}.Release|x64.ActiveCfg = Release|Any CPU
+		{775B9DE1-D15F-450A-B6CA-91D5E65F37F6}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

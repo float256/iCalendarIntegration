@@ -1,0 +1,15 @@
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'room')
+BEGIN
+	CREATE TABLE [dbo].[room](
+		[id_room] [int] IDENTITY(1,1) NOT NULL,
+		[tl_api_code] [nvarchar](max) NOT NULL,
+		[url] [nvarchar](max) NOT NULL,
+		[name] [nvarchar](max) NOT NULL,
+		[id_hotel] [int] NOT NULL,
+		CONSTRAINT [PK_room] PRIMARY KEY CLUSTERED
+		(
+			[id_room] ASC
+		)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+	) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+END
+GO
