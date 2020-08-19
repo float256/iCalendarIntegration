@@ -4,32 +4,38 @@
       <a routerLink="/">Home</a>
     </li>
     <li class="breadcrumb-item" aria-current="page">
-      <a routerLink="/Hotel/1">Hotel#{{hotelId}}</a>
+      <a routerLink="/Hotel/{{ hotel?.id }}">{{ hotel?.name }}</a>
     </li>
     <li class="breadcrumb-item active" aria-current="page">Add Room</li>
   </ol>
 </nav>
-<p class="h3 mb-4">Add room in "Hotel#{{hotelId}}"</p>
-<form>
+<p class="h3 mb-4">Add room in "{{ hotel?.name }}"</p>
+<form (ngSubmit)="onSubmit()" [formGroup]="form">
   <div class="form-group row">
     <label for="nameField" class="col-sm-2 col-form-label">Name</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="nameField" placeholder="Room name">
+      <input type="text" class="form-control" id="nameField" formControlName="Name" placeholder="Room name">
     </div>
+    <div class="col-md-10 offset-2 text-danger" *ngIf="formControls.Name.touched && formControls.Name.errors?.required">Name is required</div>
+    <div class="col-md-10 offset-2 text-danger" *ngIf="formControls.Name.touched && formControls.Name.errors?.onlySpaces">A value consisting only of spaces is not valid</div>
   </div>
   <div class="form-group row">
     <label for="TLApiCodeField" class="col-sm-2 col-form-label">TLApiCode</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="TLApiCodeField" placeholder="Room TLApiCode">
+      <input type="text" class="form-control" id="TLApiCodeField"formControlName="TLApiCode" placeholder="Room TLApiCode">
     </div>
+    <div class="col-md-10 offset-2 text-danger" *ngIf="formControls.TLApiCode.touched && formControls.TLApiCode.errors?.required">TLApiCode is required</div>
+    <div class="col-md-10 offset-2 text-danger" *ngIf="formControls.TLApiCode.touched && formControls.TLApiCode.errors?.onlySpaces">A value consisting only of spaces is not valid</div>
   </div>
   <div class="form-group row">
     <label for="UrlField" class="col-sm-2 col-form-label">URL</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="UrlField" placeholder="Room URL">
+      <input type="text" class="form-control" id="UrlField" formControlName="Url" placeholder="Room URL">
     </div>
+    <div class="col-md-10 offset-2 text-danger" *ngIf="formControls.Url.touched && formControls.Url.errors?.required">Url is required</div>
+    <div class="col-md-10 offset-2 text-danger" *ngIf="formControls.Url.touched && formControls.Url.errors?.onlySpaces">A value consisting only of spaces is not valid</div>
   </div>
-  <input type="hidden" name="hotelId" value="{{hotelId}}" />
-  <button type="submit" class="btn btn-primary">Submit</button>
+  <input type="hidden" name="hotelId" value="{{hotelId}}" formControlName="HotelId" />
+  <button type="submit" class="btn btn-primary" [disabled]="!form.valid">Submit</button>
 </form>
 

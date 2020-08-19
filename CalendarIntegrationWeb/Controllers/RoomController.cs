@@ -57,14 +57,7 @@ namespace CalendarIntegrationWeb.Controllers
                     TLApiCode = room.TLApiCode,
                     Url = room.Url
                 }).ToList();
-            if (result.Count > 0)
-            {
-                return Ok(result);
-            }
-            else
-            {
-                return NotFound();
-            }
+            return Ok(result);
         }
 
         [HttpGet("GetAll")]

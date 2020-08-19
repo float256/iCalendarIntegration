@@ -68,14 +68,7 @@ namespace CalendarIntegrationWeb.Controllers
                     EndBooking = elem.EndBooking,
                     RoomId = elem.RoomId
                 }).ToList();
-            if (result.Count > 0)
-            {
-                return Ok(result);
-            }
-            else
-            {
-                return NotFound();
-            }
+            return Ok(result);
         }
 
         [HttpPost("Add")]
