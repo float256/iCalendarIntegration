@@ -1,12 +1,12 @@
 <div class="row justify-content-center">
   <div class="col-md-8">
-    <p class="h4 text-center mt-5">Do you really want to delete "Hotel#{{hotelId}}"</p>
-    <form class="p-0">
+    <p class="h4 text-center mt-5">Do you really want to delete "{{ hotel?.name }}"</p>
+    <form class="p-0" (ngSubmit)="onSubmit()">
       <div class="row justify-content-center my-5 pt-1">
         <a routerLink="/" class="btn col-md-2 col-sm-4 pt-2 pb-2 mx-2 btn-outline-secondary">No</a>
         <button type="submit" class="btn col-md-2 mx-2 col-sm-4 pt-2 pb-2 btn-primary">Yes</button>
       </div>
-      <input type="hidden" name="Id" value="{{hotelId}}" />
+      <input type="hidden" name="Id" />
     </form>
   </div>
 </div>

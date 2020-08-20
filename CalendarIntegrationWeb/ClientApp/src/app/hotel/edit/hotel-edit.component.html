@@ -4,38 +4,46 @@
       <a routerLink="/">Home</a>
     </li>
     <li class="breadcrumb-item" aria-current="page">
-      <a routerLink="/Hotel/1">Hotel#{{hotelId}}</a>
+      <a routerLink="/Hotel/{{ hotel?.id }}">{{ hotel?.name }}</a>
     </li>
     <li class="breadcrumb-item active" aria-current="page">Edit</li>
   </ol>
 </nav>
-<p class="h3 mb-4">"Hotel#{{hotelId}}" Editing</p>
-<form>
+<p class="h3 mb-4">"{{ hotel?.name }}" Editing</p>
+<form (ngSubmit)="onSubmit()" [formGroup]="form">
   <div class="form-group row">
-    <label for="nameField" class="col-sm-2 col-form-label">Name</label>
+    <label for="Name" class="col-sm-2 col-form-label">Name</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="nameField" placeholder="Hotel name" value="Hotel name">
+      <input type="text" class="form-control" id="Name" formControlName="Name" placeholder="Hotel Name">
     </div>
+    <div class="col-md-10 offset-2 text-danger" *ngIf="formControls.Name.touched && formControls.Name.errors?.required">Name is required</div>
+    <div class="col-md-10 offset-2 text-danger" *ngIf="formControls.Name.touched && formControls.Name.errors?.onlySpaces">A value consisting only of spaces is not valid</div>
   </div>
   <div class="form-group row">
-    <label for="codeField" class="col-sm-2 col-form-label">Code</label>
+    <label for="HotelCode" class="col-sm-2 col-form-label">Code</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="codeField" placeholder="Hotel code" value="Hotel code">
+      <input type="text" class="form-control" id="HotelCode" formControlName="HotelCode" placeholder="Hotel code">
     </div>
+    <div class="col-md-10 offset-2 text-danger" *ngIf="formControls.HotelCode.touched && formControls.HotelCode.errors?.required">Hotel Code is required</div>
+    <div class="col-md-10 offset-2 text-danger" *ngIf="formControls.HotelCode.touched && formControls.HotelCode.errors?.onlySpaces">A value consisting only of spaces is not valid</div>
   </div>
   <div class="form-group row">
-    <label for="loginField" class="col-sm-2 col-form-label">Login</label>
+    <label for="Login" class="col-sm-2 col-form-label">Login</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="loginField" placeholder="Login" value="Login">
+      <input type="text" class="form-control" id="Login" formControlName="Login" placeholder="Login">
     </div>
+    <div class="col-md-10 offset-2 text-danger" *ngIf="formControls.Login.touched && formControls.Login.errors?.required">Login is required</div>
+    <div class="col-md-10 offset-2 text-danger" *ngIf="formControls.Login.touched && formControls.Login.errors?.onlySpaces">A value consisting only of spaces is not valid</div>
   </div>
   <div class="form-group row">
-    <label for="passwordField" class="col-sm-2 col-form-label">Password</label>
+    <label for="Password" class="col-sm-2 col-form-label">Password</label>
     <div class="col-sm-10">
-      <input type="password" class="form-control" id="passwordField" placeholder="Password" value="Password">
+      <input type="password" class="form-control" id="Password" formControlName="Password" placeholder="Password">
     </div>
+    <div class="col-md-10 offset-2 text-danger" *ngIf="formControls.Password.touched && formControls.Password.errors?.required">Password is required</div>
+    <div class="col-md-10 offset-2 text-danger" *ngIf="formControls.Password.touched && formControls.Password.errors?.onlySpaces">A value consisting only of spaces is not valid</div>
   </div>
-  <input type="hidden" name="Id" value="{{hotelId}}" />
-  <button type="submit" class="btn btn-primary">Submit</button>
+  <input type="hidden" Name="Id" formControlName="Id" />
+  <button type="submit" [disabled]="!form.valid" class="btn btn-primary">Submit</button>
 </form>
 

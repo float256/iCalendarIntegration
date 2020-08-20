@@ -9,51 +9,15 @@
   <a routerLink="/Hotel/Add/" class="btn btn-primary btn-sm" role="button" aria-disabled="true">+ Add hotel</a>
 </div>
 <div class="list-group">
-  <div class="list-group-item d-flex justify-content-between py-0 pr-0">
-    <a routerLink="Hotel/1" class="row py-2 pl-3 br-1 w-100 border-right">Hotel #1</a>
+  <div class="list-group-item d-flex justify-content-between py-0 pr-0" *ngFor="let currHotel of allHotels">
+    <a routerLink="Hotel/{{ currHotel.id }}" class="row py-2 pl-3 br-1 w-100 border-right">{{ currHotel.name }}</a>
     <div class="dropleft ml-auto w-auto row">
       <button class="btn shadow-none mt-auto mb-auto mx-3" id="hotel1DropdownMenu" data-toggle="dropdown">
         <i class="fas fa-ellipsis-v"></i>
       </button>
       <div class="dropdown-menu rounded-0" aria-labelledby="hotel1DropdownMenu">
-        <a class="dropdown-item" routerLink="/Hotel/Edit/1">Edit</a>
-        <a class="dropdown-item" routerLink="/Hotel/Delete/1">Delete</a>
-      </div>
-    </div>
-  </div>
-  <div class="list-group-item d-flex justify-content-between py-0 pr-0">
-    <a routerLink="Hotel/2" class="row py-2 pl-3 br-1 w-100 border-right">Hotel #2</a>
-    <div class="dropleft ml-auto w-auto row">
-      <button class="btn shadow-none mt-auto mb-auto mx-3" id="hotel2DropdownMenu" data-toggle="dropdown">
-        <i class="fas fa-ellipsis-v"></i>
-      </button>
-      <div class="dropdown-menu rounded-0" aria-labelledby="hotel2DropdownMenu">
-        <a class="dropdown-item" routerLink="/Hotel/Edit/2">Edit</a>
-        <a class="dropdown-item" routerLink="/Hotel/Delete/2">Delete</a>
-      </div>
-    </div>
-  </div>
-  <div class="list-group-item d-flex justify-content-between py-0 pr-0">
-    <a routerLink="Hotel/3" class="row py-2 pl-3 br-1 w-100 border-right">Hotel #3</a>
-    <div class="dropleft ml-auto w-auto row">
-      <button class="btn shadow-none mt-auto mb-auto mx-3" id="hotel3DropdownMenu" data-toggle="dropdown">
-        <i class="fas fa-ellipsis-v"></i>
-      </button>
-      <div class="dropdown-menu rounded-0" aria-labelledby="hotel3DropdownMenu">
-        <a class="dropdown-item" routerLink="/Hotel/Edit/3">Edit</a>
-        <a class="dropdown-item" routerLink="/Hotel/Delete/3">Delete</a>
-      </div>
-    </div>
-  </div>
-  <div class="list-group-item d-flex justify-content-between py-0 pr-0">
-    <a routerLink="Hotel/4" class="row py-2 pl-3 br-1 w-100 border-right">Hotel #4</a>
-    <div class="dropleft ml-auto w-auto row">
-      <button class="btn shadow-none mt-auto mb-auto mx-3" id="hotel4DropdownMenu" data-toggle="dropdown">
-        <i class="fas fa-ellipsis-v"></i>
-      </button>
-      <div class="dropdown-menu rounded-0" aria-labelledby="hotel4DropdownMenu">
-        <a class="dropdown-item" routerLink="/Hotel/Edit/4">Edit</a>
-        <a class="dropdown-item" routerLink="/Hotel/Delete/4">Delete</a>
+        <a class="dropdown-item" routerLink="/Hotel/Edit/{{ currHotel.id }}">Edit</a>
+        <a class="dropdown-item" routerLink="/Hotel/Delete/{{ currHotel.id }}">Delete</a>
       </div>
     </div>
   </div>
