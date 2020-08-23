@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace CalendarIntegrationCore.Models
 {
-    public class CalendarParser
+    public class CalendarParser: ICalendarParser
     {
         private List<string> _dateParsingFormats = new List<string>{ "yyyyMMdd", "yyyyMMddTHHmmssZ" };
 
