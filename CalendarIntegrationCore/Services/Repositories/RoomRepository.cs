@@ -1,5 +1,6 @@
 ﻿using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,17 +20,17 @@ namespace CalendarIntegrationCore.Services.Repositories
 
         public Room Get(int id)
         {
-            return _context.RoomSet.Where(x => x.Id == id).SingleOrDefault();
+            return _context.RoomSet.AsNoTracking().Where(x => x.Id == id).SingleOrDefault();
         }
 
         public List<Room> GetByHotelId(int hotelId)
         {
-            return _context.RoomSet.Where(room => room.HotelId == hotelId).ToList();
+            return _context.RoomSet.AsNoTracking().Where(room => room.HotelId == hotelId).ToList();
         }
 
         public List<Room> GetAll()
         {
-            return _context.RoomSet.ToList();
+            return _context.RoomSet.AsNoTracking().ToList();
         }
 
         public void Add(Room room)
@@ -48,6 +49,7 @@ namespace CalendarIntegrationCore.Services.Repositories
         public void Update(Room room)
         {
             _context.RoomSet.Update(room);
+            _context.Entry(room).State = EntityState.Modified;
             _context.SaveChanges();
         }
     }

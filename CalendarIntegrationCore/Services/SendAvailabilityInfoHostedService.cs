@@ -9,18 +9,18 @@ namespace CalendarIntegrationCore.Services
 {
     public class SendAvailabilityInfoHostedService : IDisposable, IHostedService
     {
-        private readonly int _taskPeriod;
+        private readonly TimeSpan _timerPeriod;
         private readonly IAvailabilityInfoSender _infoSender;
         private readonly ILogger<SendAvailabilityInfoHostedService> _logger;
         private Timer _timer;
 
-
-        public SendAvailabilityInfoHostedService(IAvailabilityInfoSender infoSender, int taskPeriod, 
-            ILogger<SendAvailabilityInfoHostedService> logger)
+        public SendAvailabilityInfoHostedService(IAvailabilityInfoSender infoSender, 
+            ILogger<SendAvailabilityInfoHostedService> logger,
+            TimeSpan timerPeriod)
         {
             _infoSender = infoSender;
-            _taskPeriod = taskPeriod;
             _logger = logger;
+            _timerPeriod = timerPeriod;
         }
 
         public void Dispose()
@@ -31,13 +31,13 @@ namespace CalendarIntegrationCore.Services
         public void RunTask(object state)
         {
             _infoSender.SaveAndSendAllInfo();
+            _logger.LogInformation("Availability rooms information has been sent");
         }
         
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("SendAvailabilityInfoHostedService is started");
-            _timer = new Timer(RunTask, null, TimeSpan.Zero, 
-                TimeSpan.FromSeconds(_taskPeriod));
+            _timer = new Timer(RunTask, null, TimeSpan.Zero, _timerPeriod);
             return Task.CompletedTask;
         }
 

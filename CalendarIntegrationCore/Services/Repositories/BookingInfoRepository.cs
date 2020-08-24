@@ -1,5 +1,6 @@
 ﻿using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,27 +19,27 @@ namespace CalendarIntegrationCore.Services.Repositories
 
         public BookingInfo Get(int id)
         {
-            return _context.BookingInfoSet.Where(x => x.Id == id).SingleOrDefault();
+            BookingInfo bookingInfo = _context.BookingInfoSet.AsNoTracking().Where(x => x.Id == id).SingleOrDefault();
+            return bookingInfo;
         }
 
         public List<BookingInfo> GetByRoomId(int roomId)
         {
-            List<BookingInfo> bookingInfoForRoom = _context.BookingInfoSet.Where(bookingInfo => bookingInfo.RoomId == roomId).ToList();
-            bookingInfoForRoom.OrderBy(elem => elem.StartBooking);
-            return bookingInfoForRoom;
+            List<BookingInfo> bookingInfoForRoom = _context.BookingInfoSet.AsNoTracking().Where(bookingInfo => bookingInfo.RoomId == roomId).ToList();
+            return bookingInfoForRoom.OrderBy(elem => elem.StartBooking).ToList();
         }
 
         public List<BookingInfo> GetAll()
         {
-            List<BookingInfo> allBookingInfo = _context.BookingInfoSet.ToList();
-            allBookingInfo.OrderBy(elem => elem.StartBooking);
-            return allBookingInfo;
+            List<BookingInfo> allBookingInfo = _context.BookingInfoSet.AsNoTracking().ToList();
+            return allBookingInfo.OrderBy(elem => elem.StartBooking).ToList();
         }
 
         public void Add(BookingInfo bookingInfo)
         {
             _context.BookingInfoSet.Add(bookingInfo);
             _context.SaveChanges();
+            _context.Entry<BookingInfo>(bookingInfo).State = EntityState.Detached;
         }
 
         public void Delete(int id)
@@ -51,7 +52,9 @@ namespace CalendarIntegrationCore.Services.Repositories
         public void Update(BookingInfo bookingInfo)
         {
             _context.BookingInfoSet.Update(bookingInfo);
+            _context.Entry(bookingInfo).State = EntityState.Modified;
             _context.SaveChanges();
+            _context.Entry<BookingInfo>(bookingInfo).State = EntityState.Detached;
         }
     }
 }
