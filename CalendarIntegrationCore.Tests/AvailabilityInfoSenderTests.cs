@@ -11,6 +11,7 @@ using CalendarIntegrationCore.Services.Repositories;
 using Xunit;
 using Moq;
 using Moq.Protected;
+using Microsoft.Extensions.Logging;
 
 namespace CalendarIntegrationCore.Tests
 {
@@ -28,12 +29,13 @@ namespace CalendarIntegrationCore.Tests
                 "END:VCALENDAR");
             string url = "http://example.com";
             
-            Mock<IHotelRepository> mockHotelRepository = new Mock<IHotelRepository>();
-            Mock<IRoomRepository> mockRoomRepository = new Mock<IRoomRepository>();
-            Mock<IBookingInfoRepository> mockBookingInfoRepository = new Mock<IBookingInfoRepository>();
-            Mock<ICalendarParser> mockCalendarParser = new Mock<ICalendarParser>();
-            Mock<IHttpClientFactory> mockHttpClientFactory = new Mock<IHttpClientFactory>();  
-            Mock<HttpMessageHandler> mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+            Mock<IHotelRepository> mockHotelRepository = new Mock<IHotelRepository>(MockBehavior.Strict);
+            Mock<IRoomRepository> mockRoomRepository = new Mock<IRoomRepository>(MockBehavior.Strict);
+            Mock<IBookingInfoRepository> mockBookingInfoRepository = new Mock<IBookingInfoRepository>(MockBehavior.Strict);
+            Mock<ICalendarParser> mockCalendarParser = new Mock<ICalendarParser>(MockBehavior.Strict);
+            Mock<IHttpClientFactory> mockHttpClientFactory = new Mock<IHttpClientFactory>(MockBehavior.Strict);  
+            Mock<HttpMessageHandler> mockHttpMessageHandler = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+            Mock<ILogger<AvailabilityInfoSender>> mockLogger = new Mock<ILogger<AvailabilityInfoSender>>(MockBehavior.Strict);
 
             mockHttpMessageHandler.Protected()  
                 .Setup<Task<HttpResponseMessage>>("SendAsync", 
@@ -50,14 +52,16 @@ namespace CalendarIntegrationCore.Tests
                 BaseAddress = new Uri(url)
             };
             mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
-            Mock<IAvailabilityInfoSender> mockAvailabilityInfoSender = new Mock<IAvailabilityInfoSender>();
+            Mock<IAvailabilityInfoSender> mockAvailabilityInfoSender = new Mock<IAvailabilityInfoSender>(MockBehavior.Strict);
             
             // Act
             var availabilityInfoSender = new AvailabilityInfoSender(
                 mockHotelRepository.Object, 
                 mockRoomRepository.Object,
                 mockBookingInfoRepository.Object,
-                mockCalendarParser.Object, mockHttpClientFactory.Object);
+                mockCalendarParser.Object, 
+                mockHttpClientFactory.Object,
+                mockLogger.Object);
             string actualCalendar = availabilityInfoSender.GetCalendarByUrl(url);
             
             // Assert
@@ -71,12 +75,13 @@ namespace CalendarIntegrationCore.Tests
             string expectedCalendar = String.Empty;
             string url = "http://example.com";
 
-            Mock<IHotelRepository> mockHotelRepository = new Mock<IHotelRepository>();
-            Mock<IRoomRepository> mockRoomRepository = new Mock<IRoomRepository>();
-            Mock<IBookingInfoRepository> mockBookingInfoRepository = new Mock<IBookingInfoRepository>();
-            Mock<ICalendarParser> mockCalendarParser = new Mock<ICalendarParser>();
-            Mock<IHttpClientFactory> mockHttpClientFactory = new Mock<IHttpClientFactory>();  
-            Mock<HttpMessageHandler> mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+            Mock<IHotelRepository> mockHotelRepository = new Mock<IHotelRepository>(MockBehavior.Strict);
+            Mock<IRoomRepository> mockRoomRepository = new Mock<IRoomRepository>(MockBehavior.Strict);
+            Mock<IBookingInfoRepository> mockBookingInfoRepository = new Mock<IBookingInfoRepository>(MockBehavior.Strict);
+            Mock<ICalendarParser> mockCalendarParser = new Mock<ICalendarParser>(MockBehavior.Strict);
+            Mock<IHttpClientFactory> mockHttpClientFactory = new Mock<IHttpClientFactory>(MockBehavior.Strict);  
+            Mock<HttpMessageHandler> mockHttpMessageHandler = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+            Mock<ILogger<AvailabilityInfoSender>> mockLogger = new Mock<ILogger<AvailabilityInfoSender>>(MockBehavior.Strict);
 
             mockHttpMessageHandler.Protected()  
                 .Setup<Task<HttpResponseMessage>>("SendAsync", 
@@ -93,14 +98,15 @@ namespace CalendarIntegrationCore.Tests
                 BaseAddress = new Uri(url)
             };
             mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
-            Mock<IAvailabilityInfoSender> mockAvailabilityInfoSender = new Mock<IAvailabilityInfoSender>();
+            Mock<IAvailabilityInfoSender> mockAvailabilityInfoSender = new Mock<IAvailabilityInfoSender>(MockBehavior.Strict);
             
             // Act
             var availabilityInfoSender = new AvailabilityInfoSender(
                 mockHotelRepository.Object, 
                 mockRoomRepository.Object,
                 mockBookingInfoRepository.Object,
-                mockCalendarParser.Object, mockHttpClientFactory.Object);
+                mockCalendarParser.Object, mockHttpClientFactory.Object, 
+                mockLogger.Object);
             string actualCalendar = availabilityInfoSender.GetCalendarByUrl(url);
             
             // Assert
@@ -192,12 +198,13 @@ namespace CalendarIntegrationCore.Tests
                     EndBooking = new DateTime(1953, 6, 3),
                 }
             };
-            Mock<IHotelRepository> mockHotelRepository = new Mock<IHotelRepository>();
-            Mock<IRoomRepository> mockRoomRepository = new Mock<IRoomRepository>();
-            Mock<ICalendarParser> mockCalendarParser = new Mock<ICalendarParser>();
-            Mock<IHttpClientFactory> mockHttpClientFactory = new Mock<IHttpClientFactory>();  
-            Mock<IBookingInfoRepository> mockBookingInfoRepository = new Mock<IBookingInfoRepository>();
-            
+            Mock<IHotelRepository> mockHotelRepository = new Mock<IHotelRepository>(MockBehavior.Strict);
+            Mock<IRoomRepository> mockRoomRepository = new Mock<IRoomRepository>(MockBehavior.Strict);
+            Mock<ICalendarParser> mockCalendarParser = new Mock<ICalendarParser>(MockBehavior.Strict);
+            Mock<IHttpClientFactory> mockHttpClientFactory = new Mock<IHttpClientFactory>(MockBehavior.Strict);  
+            Mock<IBookingInfoRepository> mockBookingInfoRepository = new Mock<IBookingInfoRepository>(MockBehavior.Strict);
+            Mock<ILogger<AvailabilityInfoSender>> mockLogger = new Mock<ILogger<AvailabilityInfoSender>>(MockBehavior.Strict);
+
             mockBookingInfoRepository.Setup(bookingInfo => bookingInfo.GetByRoomId(It.IsAny<int>()))
                 .Returns<int>(roomId =>
                     bookingInfoRepositoryData.FindAll(elem => (elem.RoomId == roomId))
@@ -207,8 +214,13 @@ namespace CalendarIntegrationCore.Tests
                     parsedCalendarBookingInfo.OrderBy(elem => elem.StartBooking).ToList());
             
             // Act
-            AvailabilityInfoSender infoSender = new AvailabilityInfoSender(mockHotelRepository.Object, mockRoomRepository.Object,
-                mockBookingInfoRepository.Object, mockCalendarParser.Object, mockHttpClientFactory.Object);
+            AvailabilityInfoSender infoSender = new AvailabilityInfoSender(
+                mockHotelRepository.Object, 
+                mockRoomRepository.Object,
+                mockBookingInfoRepository.Object, 
+                mockCalendarParser.Object,
+                mockHttpClientFactory.Object,
+                mockLogger.Object);
             BookingInfoChanges actual = infoSender.GetChanges(String.Empty, roomId);
             
             // Assert
@@ -242,11 +254,12 @@ namespace CalendarIntegrationCore.Tests
             BookingInfoChanges expected = new BookingInfoChanges();
             int roomId = 1;
             
-;           Mock<IHotelRepository> mockHotelRepository = new Mock<IHotelRepository>();
-            Mock<IRoomRepository> mockRoomRepository = new Mock<IRoomRepository>();
-            Mock<IBookingInfoRepository> mockBookingInfoRepository = new Mock<IBookingInfoRepository>();
-            Mock<ICalendarParser> mockCalendarParser = new Mock<ICalendarParser>();
-            Mock<IHttpClientFactory> mockHttpClientFactory = new Mock<IHttpClientFactory>(); 
+;           Mock<IHotelRepository> mockHotelRepository = new Mock<IHotelRepository>(MockBehavior.Strict);
+            Mock<IRoomRepository> mockRoomRepository = new Mock<IRoomRepository>(MockBehavior.Strict);
+            Mock<IBookingInfoRepository> mockBookingInfoRepository = new Mock<IBookingInfoRepository>(MockBehavior.Strict);
+            Mock<ICalendarParser> mockCalendarParser = new Mock<ICalendarParser>(MockBehavior.Strict);
+            Mock<ILogger<AvailabilityInfoSender>> mockLogger = new Mock<ILogger<AvailabilityInfoSender>>(MockBehavior.Strict);
+            Mock<IHttpClientFactory> mockHttpClientFactory = new Mock<IHttpClientFactory>(MockBehavior.Strict); 
             mockBookingInfoRepository.Setup(bookingInfo => bookingInfo.GetByRoomId(It.IsAny<int>()))
                 .Returns<int>(roomId =>
                     bookingInfoRepositoryData.FindAll(elem => (elem.RoomId == roomId))
@@ -256,8 +269,13 @@ namespace CalendarIntegrationCore.Tests
                     parsedCalendarBookingInfo.OrderBy(elem => elem.StartBooking).ToList());
             
             // Act
-            AvailabilityInfoSender infoSender = new AvailabilityInfoSender(mockHotelRepository.Object, mockRoomRepository.Object,
-                mockBookingInfoRepository.Object, mockCalendarParser.Object, mockHttpClientFactory.Object);
+            AvailabilityInfoSender infoSender = new AvailabilityInfoSender(
+                mockHotelRepository.Object,
+                mockRoomRepository.Object,
+                mockBookingInfoRepository.Object, 
+                mockCalendarParser.Object, 
+                mockHttpClientFactory.Object,
+                mockLogger.Object);
             BookingInfoChanges actual = infoSender.GetChanges(String.Empty, roomId);
             
             // Assert
@@ -355,11 +373,12 @@ namespace CalendarIntegrationCore.Tests
                 }
             };
             
-            Mock<IHotelRepository> mockHotelRepository = new Mock<IHotelRepository>();
-            Mock<IRoomRepository> mockRoomRepository = new Mock<IRoomRepository>();
-            Mock<ICalendarParser> mockCalendarParser = new Mock<ICalendarParser>();
-            Mock<IHttpClientFactory> mockHttpClientFactory = new Mock<IHttpClientFactory>();  
-            Mock<IBookingInfoRepository> mockBookingInfoRepository = new Mock<IBookingInfoRepository>();
+            Mock<IHotelRepository> mockHotelRepository = new Mock<IHotelRepository>(MockBehavior.Strict);
+            Mock<IRoomRepository> mockRoomRepository = new Mock<IRoomRepository>(MockBehavior.Strict);
+            Mock<ICalendarParser> mockCalendarParser = new Mock<ICalendarParser>(MockBehavior.Strict);
+            Mock<IHttpClientFactory> mockHttpClientFactory = new Mock<IHttpClientFactory>(MockBehavior.Strict);  
+            Mock<IBookingInfoRepository> mockBookingInfoRepository = new Mock<IBookingInfoRepository>(MockBehavior.Strict);
+            Mock<ILogger<AvailabilityInfoSender>> mockLogger = new Mock<ILogger<AvailabilityInfoSender>>(MockBehavior.Strict);
 
             mockBookingInfoRepository.Setup(repository => repository.Add(It.IsAny<BookingInfo>()))
                 .Callback((BookingInfo bookingInfo) =>
@@ -375,8 +394,13 @@ namespace CalendarIntegrationCore.Tests
                 });
             
             // Act
-            AvailabilityInfoSender infoSender = new AvailabilityInfoSender(mockHotelRepository.Object, mockRoomRepository.Object,
-                mockBookingInfoRepository.Object, mockCalendarParser.Object, mockHttpClientFactory.Object);
+            AvailabilityInfoSender infoSender = new AvailabilityInfoSender(
+                mockHotelRepository.Object, 
+                mockRoomRepository.Object,
+                mockBookingInfoRepository.Object, 
+                mockCalendarParser.Object, 
+                mockHttpClientFactory.Object, 
+                mockLogger.Object);
             infoSender.SaveChanges(changes);
             
             // Assert
@@ -435,11 +459,12 @@ namespace CalendarIntegrationCore.Tests
             int maxBookingInfoId = 2;
             BookingInfoChanges changes = new BookingInfoChanges();
             
-            Mock<IHotelRepository> mockHotelRepository = new Mock<IHotelRepository>();
-            Mock<IRoomRepository> mockRoomRepository = new Mock<IRoomRepository>();
-            Mock<ICalendarParser> mockCalendarParser = new Mock<ICalendarParser>();
-            Mock<IHttpClientFactory> mockHttpClientFactory = new Mock<IHttpClientFactory>();  
-            Mock<IBookingInfoRepository> mockBookingInfoRepository = new Mock<IBookingInfoRepository>();
+            Mock<IHotelRepository> mockHotelRepository = new Mock<IHotelRepository>(MockBehavior.Strict);
+            Mock<IRoomRepository> mockRoomRepository = new Mock<IRoomRepository>(MockBehavior.Strict);
+            Mock<ICalendarParser> mockCalendarParser = new Mock<ICalendarParser>(MockBehavior.Strict);
+            Mock<IHttpClientFactory> mockHttpClientFactory = new Mock<IHttpClientFactory>(MockBehavior.Strict);  
+            Mock<IBookingInfoRepository> mockBookingInfoRepository = new Mock<IBookingInfoRepository>(MockBehavior.Strict);
+            Mock<ILogger<AvailabilityInfoSender>> mockLogger = new Mock<ILogger<AvailabilityInfoSender>>(MockBehavior.Strict);
 
             mockBookingInfoRepository.Setup(repository => repository.Add(It.IsAny<BookingInfo>()))
                 .Callback((BookingInfo bookingInfo) =>
@@ -455,8 +480,13 @@ namespace CalendarIntegrationCore.Tests
                 });
             
             // Act
-            AvailabilityInfoSender infoSender = new AvailabilityInfoSender(mockHotelRepository.Object, mockRoomRepository.Object,
-                mockBookingInfoRepository.Object, mockCalendarParser.Object, mockHttpClientFactory.Object);
+            AvailabilityInfoSender infoSender = new AvailabilityInfoSender(
+                mockHotelRepository.Object,
+                mockRoomRepository.Object,
+                mockBookingInfoRepository.Object, 
+                mockCalendarParser.Object, 
+                mockHttpClientFactory.Object, 
+                mockLogger.Object);
             infoSender.SaveChanges(changes);
             
             // Assert

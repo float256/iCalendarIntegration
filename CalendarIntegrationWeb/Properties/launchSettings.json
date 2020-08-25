@@ -13,7 +13,6 @@
       "launchBrowser": true,
       "environmentVariables": {
         "APP_WORKING_MODE": "Console",
-        "SEND_INFO_PERIOD_IN_SECONDS": "60"
       }
     },
     "CalendarIntegrationWeb": {
@@ -21,7 +20,6 @@
       "launchBrowser": true,
       "environmentVariables": {
         "APP_WORKING_MODE": "Console",
-        "SEND_INFO_PERIOD_IN_SECONDS": "60"
       },
       "applicationUrl": "http://localhost:5000"
     }

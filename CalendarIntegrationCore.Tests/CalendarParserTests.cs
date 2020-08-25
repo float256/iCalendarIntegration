@@ -92,7 +92,7 @@ namespace CalendarIntegrationCore.Tests
             for (int i = 0; i < expectedDates.Count; i++)
             {
                 BookingInfo currExpectedDate = expectedDates[i];
-                BookingInfo currDateFromTemplate = expectedDates[i];
+                BookingInfo currDateFromTemplate = parsedDatesFromTemplate[i];
                 
                 Assert.Equal(currExpectedDate, currDateFromTemplate);
             }
@@ -221,7 +221,6 @@ namespace CalendarIntegrationCore.Tests
             string dateString = "20200926";
             DateTime expectedDate = new DateTime(2020, 09, 26);
             CalendarParser calendarParser = new CalendarParser();
-            string expectedExceptionMessage = "Can't parse data using specified formats";
             
             // Act
             DateTime actualDate = calendarParser.ParseDate(dateString);

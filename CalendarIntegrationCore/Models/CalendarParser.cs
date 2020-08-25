@@ -8,13 +8,7 @@ namespace CalendarIntegrationCore.Models
 {
     public class CalendarParser: ICalendarParser
     {
-        private List<string> _dateParsingFormats = new List<string>{ "yyyyMMdd", "yyyyMMddTHHmmssZ" };
-
-        public CalendarParser() { }
-        public CalendarParser(List<string> dateParsingFormats)
-        {
-            _dateParsingFormats = dateParsingFormats;
-        }
+        private static List<string> _dateParsingFormats = new List<string>{ "yyyyMMdd", "yyyyMMddTHHmmssZ" };
         
         private enum ParserState
         {
@@ -29,14 +23,15 @@ namespace CalendarIntegrationCore.Models
             ParserState state = ParserState.OutEventBlock;
             List<string> calendarFileLines = calendar.Split('\n').Select(x => x.Trim()).ToList();
             List<BookingInfo> result = new List<BookingInfo>();
-            
-            foreach (var (currLine, lineIndex) in calendarFileLines.Select((value, idx) => ( value, idx )))
+
+            for (int lineIndex = 0; lineIndex < calendarFileLines.Count; lineIndex++)
             {
+                string currLine = calendarFileLines[lineIndex];
                 if (currLine == "BEGIN:VEVENT")
                 {
                     if (state == ParserState.InEventBlock)
                     {
-                        throw new FormatException($"Unexpected start of \"VEVENT\" block on line {lineIndex + 1}");
+                        throw new CalendarParserException($"Unexpected start of \"VEVENT\" block on line {lineIndex + 1}");
                     }
                     else
                     {
@@ -47,15 +42,15 @@ namespace CalendarIntegrationCore.Models
                 {
                     if (state == ParserState.OutEventBlock)
                     {
-                        throw new FormatException($"Unexpected end of \"VEVENT\" block on line {lineIndex + 1}");
+                        throw new CalendarParserException($"Unexpected end of \"VEVENT\" block on line {lineIndex + 1}");
                     }
                     else if (startDate == default)
                     {
-                        throw new FormatException("One of the blocks doesn't contain a start date");
+                        throw new CalendarParserException("One of the blocks doesn't contain a start date");
                     }
                     else if (endDate == default)
                     {
-                        throw new FormatException("One of the blocks doesn't contain an end date");
+                        throw new CalendarParserException("One of the blocks doesn't contain an end date");
                     }
                     else
                     {
@@ -92,7 +87,7 @@ namespace CalendarIntegrationCore.Models
                     return result.ToUniversalTime();
                 }
             }
-            throw new FormatException("Can't parse data using specified formats");
+            throw new CalendarParserException("Can't parse data using specified formats");
         }
     }
 }

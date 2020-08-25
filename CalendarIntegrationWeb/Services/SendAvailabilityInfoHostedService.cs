@@ -4,8 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using CalendarIntegrationCore.Services;
+using Microsoft.Extensions.Options;
 
-namespace CalendarIntegrationCore.Services
+namespace CalendarIntegrationWeb.Services
 {
     public class SendAvailabilityInfoHostedService : IDisposable, IHostedService
     {
@@ -14,13 +16,14 @@ namespace CalendarIntegrationCore.Services
         private readonly ILogger<SendAvailabilityInfoHostedService> _logger;
         private Timer _timer;
 
-        public SendAvailabilityInfoHostedService(IAvailabilityInfoSender infoSender, 
+        public SendAvailabilityInfoHostedService(
+            IAvailabilityInfoSender infoSender, 
             ILogger<SendAvailabilityInfoHostedService> logger,
-            TimeSpan timerPeriod)
+            IOptions<SendAvailabilityInfoHostedServiceOptions> options)
         {
             _infoSender = infoSender;
             _logger = logger;
-            _timerPeriod = timerPeriod;
+            _timerPeriod = TimeSpan.FromSeconds(options.Value.SendingPeriodInSeconds);
         }
 
         public void Dispose()
