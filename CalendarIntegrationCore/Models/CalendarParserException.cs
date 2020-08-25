@@ -4,7 +4,7 @@ using System.Text;
 
 namespace CalendarIntegrationCore.Models
 {
-    class CalendarParserException: Exception
+    public class CalendarParserException: Exception
     {
         public CalendarParserException(): base() { }
         public CalendarParserException(string message) : base(message) { }

@@ -37,7 +37,9 @@ namespace CalendarIntegrationWeb
             services.AddScoped<IRoomRepository, RoomRepository>();
             services.AddScoped<IBookingInfoRepository, BookingInfoRepository>();
             services.AddScoped<ICalendarParser, CalendarParser>();
-            services.AddScoped<IAvailabilityInfoSender, AvailabilityInfoSender>();
+            services.AddScoped<IAvailabilityInfoReceiver, AvailabilityInfoReceiver>();
+            services.AddScoped<IAvailabilityInfoSaver, AvailabilityInfoSaver>();
+            services.AddScoped<IAvailabilityInfoService, AvailabilityInfoService>();
             services.Configure<SendAvailabilityInfoHostedServiceOptions>(Configuration.GetSection("SendAvailabilityInfoHostedServiceOptions"));
             services.AddHostedService<SendAvailabilityInfoHostedService>();
             services.AddHttpClient();

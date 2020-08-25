@@ -9,46 +9,39 @@ using Microsoft.Extensions.Options;
 
 namespace CalendarIntegrationWeb.Services
 {
-    public class SendAvailabilityInfoHostedService : IDisposable, IHostedService
+    public class SendAvailabilityInfoHostedService : BackgroundService, IDisposable
     {
         private readonly TimeSpan _timerPeriod;
-        private readonly IAvailabilityInfoSender _infoSender;
         private readonly ILogger<SendAvailabilityInfoHostedService> _logger;
+        private readonly IAvailabilityInfoService _availabilityInfoService;
         private Timer _timer;
 
         public SendAvailabilityInfoHostedService(
-            IAvailabilityInfoSender infoSender, 
             ILogger<SendAvailabilityInfoHostedService> logger,
-            IOptions<SendAvailabilityInfoHostedServiceOptions> options)
+            IOptions<SendAvailabilityInfoHostedServiceOptions> options,
+            IAvailabilityInfoService availabilityInfoService)
         {
-            _infoSender = infoSender;
             _logger = logger;
+            _availabilityInfoService = availabilityInfoService;
             _timerPeriod = TimeSpan.FromSeconds(options.Value.SendingPeriodInSeconds);
         }
 
-        public void Dispose()
+        private void RunTask(object state)
         {
-            _timer?.Dispose();
-        }
-
-        public void RunTask(object state)
-        {
-            _infoSender.SaveAndSendAllInfo();
+            _availabilityInfoService.ProcessAllInfo((CancellationToken) state);
             _logger.LogInformation("Availability rooms information has been sent");
         }
-        
-        public Task StartAsync(CancellationToken cancellationToken)
+
+        protected override Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("SendAvailabilityInfoHostedService is started");
-            _timer = new Timer(RunTask, null, TimeSpan.Zero, _timerPeriod);
+            _timer = new Timer(RunTask, cancellationToken, TimeSpan.Zero, _timerPeriod);
+            _logger.LogInformation("SendAvailabilityInfoHostedService background is starting");
             return Task.CompletedTask;
         }
-
-        public Task StopAsync(CancellationToken cancellationToken)
+        public override void Dispose()
         {
-            _logger.LogInformation("SendAvailabilityInfoHostedService is stopping");
-            _timer?.Change(Timeout.Infinite, 0);
-            return Task.CompletedTask;
+            _timer?.Dispose();
+            base.Dispose();
         }
     }
 }

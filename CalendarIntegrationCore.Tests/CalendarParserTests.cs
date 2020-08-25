@@ -65,19 +65,19 @@ namespace CalendarIntegrationCore.Tests
             {
                 new BookingInfo
                 {
-                    Id = roomId, 
+                    RoomId = roomId, 
                     StartBooking = new DateTime(2020, 08,29),
                     EndBooking = new DateTime(2020, 08, 30)
                 },
                 new BookingInfo
                 {
-                    Id = roomId, 
+                    RoomId = roomId, 
                     StartBooking = new DateTime(2020, 09, 26),
                     EndBooking = new DateTime(2020, 10, 24)
                 },
                 new BookingInfo
                 {
-                    Id = roomId,
+                    RoomId = roomId,
                     StartBooking = new DateTime(2021, 06, 30, 10, 18, 26),
                     EndBooking = new DateTime(2021, 08, 20, 21, 08, 56)
                 }
@@ -94,12 +94,14 @@ namespace CalendarIntegrationCore.Tests
                 BookingInfo currExpectedDate = expectedDates[i];
                 BookingInfo currDateFromTemplate = parsedDatesFromTemplate[i];
                 
-                Assert.Equal(currExpectedDate, currDateFromTemplate);
+                Assert.Equal(currExpectedDate.RoomId, currDateFromTemplate.RoomId);
+                Assert.Equal(currExpectedDate.StartBooking, currDateFromTemplate.StartBooking);
+                Assert.Equal(currExpectedDate.EndBooking, currDateFromTemplate.EndBooking);
             }
         }
 
         [Fact]
-        public void CalendarParser_ParseCalendar_UnexpectedBeginLine_ThrowsFormatException()
+        public void CalendarParser_ParseCalendar_UnexpectedBeginLine_ThrowsCalendarParserException()
         {
             // Arrange
             string incorrectTemplate = String.Join(Environment.NewLine,
@@ -124,12 +126,12 @@ namespace CalendarIntegrationCore.Tests
             Action act = () => parser.ParseCalendar(incorrectTemplate, roomId);
             
             //Assert
-            FormatException exception = Assert.Throws<FormatException>(act);
+            CalendarParserException exception = Assert.Throws<CalendarParserException>(act);
             Assert.Equal(expectedExceptionMessage, exception.Message);
         }
         
         [Fact]
-        public void CalendarParser_ParseCalendar_UnexpectedEndLine_ThrowsFormatException()
+        public void CalendarParser_ParseCalendar_UnexpectedEndLine_ThrowsCalendarParserException()
         {
             // Arrange
             string incorrectTemplate = String.Join(Environment.NewLine,
@@ -154,12 +156,12 @@ namespace CalendarIntegrationCore.Tests
             Action act = () => parser.ParseCalendar(incorrectTemplate, roomId);
             
             //Assert
-            FormatException exception = Assert.Throws<FormatException>(act);
+            CalendarParserException exception = Assert.Throws<CalendarParserException>(act);
             Assert.Equal(expectedExceptionMessage, exception.Message);
         }
         
         [Fact]
-        public void CalendarParser_ParseCalendar_BlockWithoutStartDate_ThrowsFormatException()
+        public void CalendarParser_ParseCalendar_BlockWithoutStartDate_ThrowsCalendarParserException()
         {
             // Arrange
             string incorrectTemplate = String.Join(Environment.NewLine,
@@ -182,12 +184,12 @@ namespace CalendarIntegrationCore.Tests
             Action act = () => parser.ParseCalendar(incorrectTemplate, roomId);
             
             //Assert
-            FormatException exception = Assert.Throws<FormatException>(act);
+            CalendarParserException exception = Assert.Throws<CalendarParserException>(act);
             Assert.Equal(expectedExceptionMessage, exception.Message);
         }
         
         [Fact]
-        public void CalendarParser_ParseCalendar_BlockWithoutEndDate_ThrowsFormatException()
+        public void CalendarParser_ParseCalendar_BlockWithoutEndDate_ThrowsCalendarParserException()
         {
             // Arrange
             string incorrectTemplate = String.Join(Environment.NewLine,
@@ -210,7 +212,7 @@ namespace CalendarIntegrationCore.Tests
             Action act = () => parser.ParseCalendar(incorrectTemplate, roomId);
             
             //Assert
-            FormatException exception = Assert.Throws<FormatException>(act);
+            CalendarParserException exception = Assert.Throws<CalendarParserException>(act);
             Assert.Equal(expectedExceptionMessage, exception.Message);
         }
         
@@ -234,8 +236,7 @@ namespace CalendarIntegrationCore.Tests
         {
             // Arrange
             string dateString = "19531219T123556Z";
-            DateTime expectedDate = new DateTime(1953, 12, 19, 12, 35, 56, 
-                DateTimeKind.Utc);
+            DateTime expectedDate = new DateTime(1953, 12, 19, 12, 35, 56, DateTimeKind.Utc);
             CalendarParser calendarParser = new CalendarParser();
             
             // Act
@@ -246,7 +247,7 @@ namespace CalendarIntegrationCore.Tests
         }
 
         [Fact]
-        public void CalendarParser_ParseDate_IncorrectDateFormat_ThrowsFormatException()
+        public void CalendarParser_ParseDate_IncorrectDateFormat_ThrowsCalendarParserException()
         {
             // Arrange
             string incorrectDateString = "1231T23232214Z";
@@ -257,7 +258,7 @@ namespace CalendarIntegrationCore.Tests
             Action act = () => calendarParser.ParseDate(incorrectDateString);
             
             //Assert
-            FormatException exception = Assert.Throws<FormatException>(act);
+            CalendarParserException exception = Assert.Throws<CalendarParserException>(act);
             Assert.Equal(expectedExceptionMessage, exception.Message);
         }
     }
