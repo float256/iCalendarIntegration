@@ -17,26 +17,34 @@ namespace CalendarIntegrationCore.Services
         private readonly ICalendarParser _calendarParser;
         private readonly IAvailabilityInfoSaver _infoSaver;
         private readonly IAvailabilityInfoReceiver _infoReceiver;
+        private readonly IAvailabilityInfoDataProcessor _dataProcessor;
         private readonly ILogger _logger;
 
         public AvailabilityInfoService(
             IHotelRepository hotelRepository,
             IRoomRepository roomRepository,
             IAvailabilityInfoSaver infoSaver,
+            IAvailabilityInfoReceiver infoReceiver,
+            IAvailabilityInfoDataProcessor dataProcessor,
             IBookingInfoRepository bookingInfoRepository,
             ICalendarParser calendarParser,
-            ILogger<AvailabilityInfoService> logger,
-            IAvailabilityInfoReceiver infoReceiver)
+            ILogger<AvailabilityInfoService> logger)
         {
             _hotelRepository = hotelRepository;
             _roomRepository = roomRepository;
             _bookingInfoRepository = bookingInfoRepository;
             _infoSaver = infoSaver;
-            _calendarParser = calendarParser;
             _infoReceiver = infoReceiver;
+            _dataProcessor = dataProcessor;
+            _calendarParser = calendarParser;
             _logger = logger;
         }
 
+        /// <summary>
+        /// Данный метод получает информацию о занятости для каждой комнаты по URL, указанном в Room.Url,
+        /// в виде строки с календарем, парсит календарь, после чего сохраняет изменения в БД.
+        /// </summary>
+        /// <param name="cancelToken">Токен отмены задачи</param>
         public void ProcessAllInfo(CancellationToken cancelToken)
         {
             if (!cancelToken.IsCancellationRequested)
@@ -54,10 +62,10 @@ namespace CalendarIntegrationCore.Services
                         }
                         catch (Exception exception)
                         {
-                            _logger.LogError($"{exception.GetType().Name}: {exception.Message}");
+                            _logger.LogError($"Error occurred while trying to parse the calendar. Exception name: {exception.GetType().Name}; Exception message: {exception.Message}");
                             continue;
                         }
-                        BookingInfoChanges changes = _infoReceiver.GetChanges(newAvailabilityInfo, initialAvailabilityInfo);
+                        BookingInfoChanges changes = _dataProcessor.GetChanges(newAvailabilityInfo, initialAvailabilityInfo);
                         _infoSaver.SaveChanges(changes);
                     }
                 }

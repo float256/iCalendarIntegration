@@ -4,7 +4,7 @@ using CalendarIntegrationCore.Models;
 using Xunit;
 using Moq;
 
-namespace CalendarIntegrationCore.Tests
+namespace CalendarIntegrationCore.Tests.Models
 {
     public class CalendarParserTests
     {

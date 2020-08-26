@@ -15,6 +15,11 @@ namespace CalendarIntegrationCore.Services
             _bookingInfoRepository = bookingInfoRepository;
         }
 
+        /// <summary>
+        /// Метод делает изменения в базе данных согласно переданному объекту BookingInfoChanges, а именно, 
+        /// сохраняет данные из списка AddedBookingInfo и удаляет данные, связанные со списком RemovedBookingInfo
+        /// </summary>
+        /// <param name="changes">Объект BookingInfoChanges, содержащий информацию об изменениях, которые нужно сделать в БД</param>
         public void SaveChanges(BookingInfoChanges changes)
         {
             foreach (BookingInfo bookingInfo in changes.AddedBookingInfo)
@@ -24,7 +29,7 @@ namespace CalendarIntegrationCore.Services
 
             foreach (BookingInfo bookingInfo in changes.RemovedBookingInfo)
             {
-                _bookingInfoRepository.Delete(bookingInfo.Id);
+                _bookingInfoRepository.Delete(bookingInfo);
             }
         }
     }

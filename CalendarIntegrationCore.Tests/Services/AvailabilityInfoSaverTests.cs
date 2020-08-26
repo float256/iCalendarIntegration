@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Text;
 using Xunit;
 
-namespace CalendarIntegrationCore.Tests
+namespace CalendarIntegrationCore.Tests.Services
 {
     public class AvailabilityInfoSaverTests
     {

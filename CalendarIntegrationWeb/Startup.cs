@@ -39,9 +39,10 @@ namespace CalendarIntegrationWeb
             services.AddScoped<ICalendarParser, CalendarParser>();
             services.AddScoped<IAvailabilityInfoReceiver, AvailabilityInfoReceiver>();
             services.AddScoped<IAvailabilityInfoSaver, AvailabilityInfoSaver>();
+            services.AddScoped<IAvailabilityInfoDataProcessor, AvailabilityInfoDataProcessor>();
             services.AddScoped<IAvailabilityInfoService, AvailabilityInfoService>();
-            services.Configure<SendAvailabilityInfoHostedServiceOptions>(Configuration.GetSection("SendAvailabilityInfoHostedServiceOptions"));
-            services.AddHostedService<SendAvailabilityInfoHostedService>();
+            services.Configure<SendAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("SendAvailabilityInfoHostedServiceOptions"));
+            services.AddHostedService<SendAvailabilityInfoBackgroundService>();
             services.AddHttpClient();
         }
 

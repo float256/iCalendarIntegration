@@ -1,61 +1,22 @@
 ﻿using CalendarIntegrationCore.Models;
-using CalendarIntegrationCore.Services.Repositories;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Text;
-using System.Threading;
 
 namespace CalendarIntegrationCore.Services
 {
-    public class AvailabilityInfoReceiver : IAvailabilityInfoReceiver
+    public class AvailabilityInfoDataProcessor: IAvailabilityInfoDataProcessor
     {
 
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IBookingInfoRepository _bookingInfoRepository;
-        private readonly ILogger _logger;
-
-        public AvailabilityInfoReceiver (
-            IBookingInfoRepository bookingInfoRepository,
-            IHttpClientFactory httpClientFactory,
-            ILogger<AvailabilityInfoReceiver> logger)
-        {
-            _bookingInfoRepository = bookingInfoRepository;
-            _httpClientFactory = httpClientFactory;
-            _logger = logger;
-        }
-
-        public string GetCalendarByUrl(string url, CancellationToken cancelToken)
-        {
-            if (cancelToken.IsCancellationRequested)
-            {
-                return String.Empty;
-            }
-
-            HttpClient httpClient = _httpClientFactory.CreateClient();
-            HttpResponseMessage response;
-            try
-            {
-                response = httpClient.GetAsync(url, cancelToken).Result;
-                if (response.StatusCode == HttpStatusCode.OK)
-                {
-                    return response.Content.ReadAsStringAsync().Result;
-                }
-                else
-                {
-                    return String.Empty;
-                }
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError($"{exception.GetType().Name}: {exception.Message}");
-                return String.Empty;
-            }
-        }
-
+        /// <summary>
+        /// Метод ищет отличия между двумя списками объектов BookingInfo и возвращает их в виде объекта BookingInfoChanges. 
+        /// Если какой-либо из объектов содержится в newAvailabilityInfo, но не содержится в initialAvailabilityInfo, он 
+        /// добавляется в BookingInfoChanges.AddedBookingInfo. В противоположном случае, он добавляется в BookingInfoChanges.RemovedBookingInfo
+        /// </summary>
+        /// <param name="newAvailabilityInfo">Новые данные о занятости комнаты</param>
+        /// <param name="initialAvailabilityInfo">Изначальные данные о занятости комнаты</param>
+        /// <returns>Объект BookingInfoChanges, содержащий информацию о различии изначальных и новых данных</returns>
         public BookingInfoChanges GetChanges(List<BookingInfo> newAvailabilityInfo, List<BookingInfo> initialAvailabilityInfo)
         {
             BookingInfoChanges changes = new BookingInfoChanges();

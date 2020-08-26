@@ -21,12 +21,12 @@ namespace CalendarIntegrationCore.Services.Repositories
         
         public Hotel Get(int id)
         {
-            return _context.HotelSet.AsNoTracking().Where(x => x.Id == id).SingleOrDefault();
+            return _context.HotelSet.Where(x => x.Id == id).SingleOrDefault();
         }
 
         public List<Hotel> GetAll()
         {
-            return _context.HotelSet.AsNoTracking().ToList();
+            return _context.HotelSet.ToList();
         }
 
         public void Add(Hotel hotel)

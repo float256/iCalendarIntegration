@@ -20,17 +20,17 @@ namespace CalendarIntegrationCore.Services.Repositories
 
         public Room Get(int id)
         {
-            return _context.RoomSet.AsNoTracking().Where(x => x.Id == id).SingleOrDefault();
+            return _context.RoomSet.Where(x => x.Id == id).SingleOrDefault();
         }
 
         public List<Room> GetByHotelId(int hotelId)
         {
-            return _context.RoomSet.AsNoTracking().Where(room => room.HotelId == hotelId).ToList();
+            return _context.RoomSet.Where(room => room.HotelId == hotelId).ToList();
         }
 
         public List<Room> GetAll()
         {
-            return _context.RoomSet.AsNoTracking().ToList();
+            return _context.RoomSet.ToList();
         }
 
         public void Add(Room room)

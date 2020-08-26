@@ -13,5 +13,6 @@ namespace CalendarIntegrationCore.Services.Repositories
         void Add(BookingInfo bookingInfo);
         void Update(BookingInfo bookingInfo);
         void Delete(int id);
+        void Delete(BookingInfo bookingInfo);
     }
 }

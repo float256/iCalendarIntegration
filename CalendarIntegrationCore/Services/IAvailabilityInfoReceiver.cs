@@ -9,6 +9,5 @@ namespace CalendarIntegrationCore.Services
     public interface IAvailabilityInfoReceiver
     {
         string GetCalendarByUrl(string url, CancellationToken cancelToken);
-        BookingInfoChanges GetChanges(List<BookingInfo> initialAvailabilityInfo, List<BookingInfo> newAvailabilityInfo);
     }
 }
