@@ -1,5 +1,6 @@
 ﻿using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -44,6 +45,7 @@ namespace CalendarIntegrationCore.Services.Repositories
         public void Update(Hotel hotel)
         {
             _context.HotelSet.Update(hotel);
+            _context.Entry(hotel).State = EntityState.Modified;
             _context.SaveChanges();
         }
     }

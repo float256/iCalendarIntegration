@@ -8,6 +8,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using CalendarIntegrationCore.Models;
+using Microsoft.Extensions.Logging;
+using CalendarIntegrationWeb.Services;
 
 namespace CalendarIntegrationWeb
 {
@@ -33,6 +36,14 @@ namespace CalendarIntegrationWeb
             services.AddScoped<IHotelRepository, HotelRepository>();
             services.AddScoped<IRoomRepository, RoomRepository>();
             services.AddScoped<IBookingInfoRepository, BookingInfoRepository>();
+            services.AddScoped<ICalendarParser, CalendarParser>();
+            services.AddScoped<IAvailabilityInfoReceiver, AvailabilityInfoReceiver>();
+            services.AddScoped<IAvailabilityInfoSaver, AvailabilityInfoSaver>();
+            services.AddScoped<IAvailabilityInfoDataProcessor, AvailabilityInfoDataProcessor>();
+            services.AddScoped<IAvailabilityInfoService, AvailabilityInfoService>();
+            services.Configure<SendAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("SendAvailabilityInfoHostedServiceOptions"));
+            services.AddHostedService<SendAvailabilityInfoBackgroundService>();
+            services.AddHttpClient();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,5 +1,6 @@
 ﻿using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,21 +19,20 @@ namespace CalendarIntegrationCore.Services.Repositories
 
         public BookingInfo Get(int id)
         {
-            return _context.BookingInfoSet.Where(x => x.Id == id).SingleOrDefault();
+            BookingInfo bookingInfo = _context.BookingInfoSet.Where(x => x.Id == id).SingleOrDefault();
+            return bookingInfo;
         }
 
         public List<BookingInfo> GetByRoomId(int roomId)
         {
             List<BookingInfo> bookingInfoForRoom = _context.BookingInfoSet.Where(bookingInfo => bookingInfo.RoomId == roomId).ToList();
-            bookingInfoForRoom.OrderBy(elem => elem.StartBooking);
-            return bookingInfoForRoom;
+            return bookingInfoForRoom.OrderBy(elem => elem.StartBooking).ToList();
         }
 
         public List<BookingInfo> GetAll()
         {
             List<BookingInfo> allBookingInfo = _context.BookingInfoSet.ToList();
-            allBookingInfo.OrderBy(elem => elem.StartBooking);
-            return allBookingInfo;
+            return allBookingInfo.OrderBy(elem => elem.StartBooking).ToList();
         }
 
         public void Add(BookingInfo bookingInfo)
@@ -44,6 +44,11 @@ namespace CalendarIntegrationCore.Services.Repositories
         public void Delete(int id)
         {
             BookingInfo bookingInfo = new BookingInfo { Id = id };
+            Delete(bookingInfo);
+        }
+
+        public void Delete(BookingInfo bookingInfo)
+        {
             _context.BookingInfoSet.Remove(bookingInfo);
             _context.SaveChanges();
         }
@@ -51,6 +56,7 @@ namespace CalendarIntegrationCore.Services.Repositories
         public void Update(BookingInfo bookingInfo)
         {
             _context.BookingInfoSet.Update(bookingInfo);
+            _context.Entry(bookingInfo).State = EntityState.Modified;
             _context.SaveChanges();
         }
     }
