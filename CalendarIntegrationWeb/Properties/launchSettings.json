@@ -19,9 +19,9 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "APP_WORKING_MODE": "Console",
+        "APP_WORKING_MODE": "Console"
       },
-      "applicationUrl": "http://localhost:5000"
+      "applicationUrl": "http://localhost:57328"
     }
   }
 }
