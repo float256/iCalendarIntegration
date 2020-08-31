@@ -1,0 +1,21 @@
+﻿{
+  "ProviderId": "Microsoft.VisualStudio.ConnectedService.Wcf",
+  "Version": "15.0.40203.910",
+  "ExtendedData": {
+    "inputs": [
+      "http://www.qatl.ru/Api/TLConnect.svc?wsdl"
+    ],
+    "collectionTypes": [
+      "System.Array",
+      "System.Collections.Generic.Dictionary`2"
+    ],
+    "namespaceMappings": [
+      "*, TLConnect"
+    ],
+    "references": [
+      "C:\\Users\\User\\source\\repos\\float256\\iCalendarIntegration\\CalendarIntegrationWeb\\bin\\Debug\\netcoreapp3.1\\win7-x64\\CalendarIntegrationCore.dll"
+    ],
+    "targetFramework": "netcoreapp3.1",
+    "typeReuseMode": "All"
+  }
+}

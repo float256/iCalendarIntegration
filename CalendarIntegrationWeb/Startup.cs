@@ -11,6 +11,7 @@ using System;
 using CalendarIntegrationCore.Models;
 using Microsoft.Extensions.Logging;
 using CalendarIntegrationWeb.Services;
+using TLConnect;
 
 namespace CalendarIntegrationWeb
 {
@@ -37,10 +38,13 @@ namespace CalendarIntegrationWeb
             services.AddScoped<IRoomRepository, RoomRepository>();
             services.AddScoped<IBookingInfoRepository, BookingInfoRepository>();
             services.AddScoped<ICalendarParser, CalendarParser>();
+            services.AddScoped<ISoapRequestCreator, SoapRequestCreator>();
             services.AddScoped<IAvailabilityInfoReceiver, AvailabilityInfoReceiver>();
             services.AddScoped<IAvailabilityInfoSaver, AvailabilityInfoSaver>();
+            services.AddScoped<IAvailabilityInfoSender, AvailabilityInfoSender>();
             services.AddScoped<IAvailabilityInfoDataProcessor, AvailabilityInfoDataProcessor>();
             services.AddScoped<IAvailabilityInfoService, AvailabilityInfoService>();
+            services.AddScoped<ITLConnectService, TLConnectServiceClient>();
             services.Configure<SendAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("SendAvailabilityInfoHostedServiceOptions"));
             services.AddHostedService<SendAvailabilityInfoBackgroundService>();
             services.AddHttpClient();
