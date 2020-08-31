@@ -26,7 +26,7 @@ namespace CalendarIntegrationWeb.Services
         public async Task SendForOneHotel(BookingInfoChangesForHotel hotelChanges)
         {
             HotelAvailNotifRQRequest request = _soapRequestCreator.CreateRequest(hotelChanges);
-            var response = await _tlConnectService.HotelAvailNotifRQAsync(request);
+            await _tlConnectService.HotelAvailNotifRQAsync(request);
         }
     }
 }
