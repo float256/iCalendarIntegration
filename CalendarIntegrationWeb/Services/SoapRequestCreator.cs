@@ -9,8 +9,8 @@ namespace CalendarIntegrationWeb.Services
 {
     public class SoapRequestCreator: ISoapRequestCreator
     {
-        private readonly string _addedBookingInfoLimitValue = "1";
-        private readonly string _removedBookingInfoLimitValue = "0";
+        private readonly string _addedBookingInfoLimitValue = "0";
+        private readonly string _removedBookingInfoLimitValue = "1";
         private readonly string _dateFormat;
 
         public SoapRequestCreator(string dateFormat = "yyyy-MM-ddTHH:mm:ss.fffffff")
@@ -39,7 +39,7 @@ namespace CalendarIntegrationWeb.Services
                     roomChanges.BookingInfoChanges, 
                     roomChanges.Room.TLApiCode, 
                     _dateFormat);
-                availStatusMessages = availStatusMessages.Concat(availStatusMessagesForCurrRoom).ToList();
+                availStatusMessages.AddRange(availStatusMessagesForCurrRoom);
             }
             request.OTA_HotelAvailNotifRQ.AvailStatusMessages.AvailStatusMessage = availStatusMessages.ToArray();
             return request;

@@ -68,7 +68,7 @@ namespace CalendarIntegrationCore.Services
                         }
                         catch (Exception exception)
                         {
-                            _logger.LogError($"Error occurred while trying to parse the calendar. Exception name: {exception.GetType().Name}; Exception message: {exception.Message}");
+                            _logger.LogError(exception, "Error occurred while trying to parse the calendar");
                             continue;
                         }
                         BookingInfoChanges changes = _dataProcessor.GetChanges(newAvailabilityInfo, initialAvailabilityInfo);
@@ -85,7 +85,7 @@ namespace CalendarIntegrationCore.Services
                     }
                     catch (Exception exception)
                     {
-                        _logger.LogError($"Error occurred while trying to send changes to TLConnect. Exception name: {exception.GetType().Name}; Exception message: {exception.Message}");
+                        _logger.LogError(exception, "Error occurred while trying to send changes to TLConnect");
                     }
                 }
             }
