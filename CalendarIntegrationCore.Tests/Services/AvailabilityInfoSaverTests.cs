@@ -110,10 +110,10 @@ namespace CalendarIntegrationCore.Tests.Services
                     bookingInfo.Id = maxBookingInfoId;
                     actualBookingInfoRepositoryData.Add(bookingInfo);
                 });
-            mockBookingInfoRepository.Setup(repository => repository.Delete(It.IsAny<int>()))
-                .Callback((int id) =>
+            mockBookingInfoRepository.Setup(repository => repository.Delete(It.IsAny<BookingInfo>()))
+                .Callback((BookingInfo bookingInfo) =>
                 {
-                    actualBookingInfoRepositoryData.RemoveAll(elem => elem.Id == id);
+                    actualBookingInfoRepositoryData.RemoveAll(elem => elem.Id == bookingInfo.Id);
                 });
 
             // Act

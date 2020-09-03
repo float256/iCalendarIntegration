@@ -12,7 +12,7 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
-        "APP_WORKING_MODE": "Console",
+        "APP_WORKING_MODE": "Console"
       }
     },
     "CalendarIntegrationWeb": {

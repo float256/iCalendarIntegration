@@ -34,7 +34,7 @@ namespace CalendarIntegrationWeb.Services
                 using (IServiceScope scope = _serviceProvider.CreateScope())
                 {
                     IAvailabilityInfoService availabilityService = scope.ServiceProvider.GetRequiredService<IAvailabilityInfoService>();
-                    availabilityService.ProcessAllInfo(cancellationToken);
+                    await availabilityService.ProcessAllInfo(cancellationToken);
                 }
                 _logger.LogInformation("Availability rooms information has been sent");
                 await Task.Delay(_timerPeriod, cancellationToken);
