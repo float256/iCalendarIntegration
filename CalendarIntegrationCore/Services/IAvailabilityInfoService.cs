@@ -8,6 +8,6 @@ namespace CalendarIntegrationCore.Services
 {
     public interface IAvailabilityInfoService
     {
-        Task ProcessAllInfo(CancellationToken cancelToken);
+        void ProcessAllInfo(CancellationToken cancelToken);
     }
 }

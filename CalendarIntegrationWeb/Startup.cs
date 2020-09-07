@@ -34,18 +34,26 @@ namespace CalendarIntegrationWeb
                 configuration.RootPath = "ClientApp/dist";
             });
             services.AddDbContext<ApplicationContext>(options => options.UseSqlServer(Configuration["ConnectionStrings:default"]));
+            
             services.AddScoped<IHotelRepository, HotelRepository>();
             services.AddScoped<IRoomRepository, RoomRepository>();
             services.AddScoped<IBookingInfoRepository, BookingInfoRepository>();
+            services.AddScoped<IAvailabilityStatusMessageRepository, AvailabilityStatusMessageRepository>();
+            
             services.AddScoped<ICalendarParser, CalendarParser>();
             services.AddScoped<ISoapRequestCreator, SoapRequestCreator>();
+            services.AddScoped<IAvailabilityStatusMessageQueue, AvailabilityStatusMessageMessageQueue>();
+            
             services.AddScoped<IAvailabilityInfoReceiver, AvailabilityInfoReceiver>();
             services.AddScoped<IAvailabilityInfoSaver, AvailabilityInfoSaver>();
             services.AddScoped<IAvailabilityInfoSender, AvailabilityInfoSender>();
             services.AddScoped<IAvailabilityInfoDataProcessor, AvailabilityInfoDataProcessor>();
             services.AddScoped<IAvailabilityInfoService, AvailabilityInfoService>();
+            
             services.AddScoped<ITLConnectService, TLConnectServiceClient>();
-            services.Configure<SendAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("SendAvailabilityInfoHostedServiceOptions"));
+            services.Configure<SaveAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("SaveAvailabilityInfoBackgroundServiceOptions"));
+            services.Configure<SendAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("SendAvailabilityInfoBackgroundServiceOptions"));
+            services.AddHostedService<SaveAvailabilityInfoBackgroundService>();
             services.AddHostedService<SendAvailabilityInfoBackgroundService>();
             services.AddHttpClient();
         }

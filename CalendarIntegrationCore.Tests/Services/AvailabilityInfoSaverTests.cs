@@ -102,7 +102,9 @@ namespace CalendarIntegrationCore.Tests.Services
             };
 
             Mock<IBookingInfoRepository> mockBookingInfoRepository = new Mock<IBookingInfoRepository>(MockBehavior.Strict);
-
+            Mock<IAvailabilityStatusMessageQueue> mockAvailabilityStatusMessageQueue = new Mock<IAvailabilityStatusMessageQueue>();
+            Mock<IAvailabilityInfoDataProcessor> mockAvailabilityInfoDataProcessor = new Mock<IAvailabilityInfoDataProcessor>();
+            
             mockBookingInfoRepository.Setup(repository => repository.Add(It.IsAny<BookingInfo>()))
                 .Callback((BookingInfo bookingInfo) =>
                 {
@@ -117,7 +119,10 @@ namespace CalendarIntegrationCore.Tests.Services
                 });
 
             // Act
-            AvailabilityInfoSaver infoSaver = new AvailabilityInfoSaver(mockBookingInfoRepository.Object);
+            AvailabilityInfoSaver infoSaver = new AvailabilityInfoSaver(
+                mockBookingInfoRepository.Object,
+                mockAvailabilityStatusMessageQueue.Object,
+                mockAvailabilityInfoDataProcessor.Object);
             infoSaver.SaveChanges(changes);
 
             // Assert
@@ -175,7 +180,10 @@ namespace CalendarIntegrationCore.Tests.Services
             };
             int maxBookingInfoId = 2;
             BookingInfoChanges changes = new BookingInfoChanges();
+            
             Mock<IBookingInfoRepository> mockBookingInfoRepository = new Mock<IBookingInfoRepository>(MockBehavior.Strict);
+            Mock<IAvailabilityStatusMessageQueue> mockAvailabilityStatusMessageQueue = new Mock<IAvailabilityStatusMessageQueue>();
+            Mock<IAvailabilityInfoDataProcessor> mockAvailabilityInfoDataProcessor = new Mock<IAvailabilityInfoDataProcessor>();
 
             mockBookingInfoRepository.Setup(repository => repository.Add(It.IsAny<BookingInfo>()))
                 .Callback((BookingInfo bookingInfo) =>
@@ -191,7 +199,10 @@ namespace CalendarIntegrationCore.Tests.Services
                 });
 
             // Act
-            AvailabilityInfoSaver infoSaver = new AvailabilityInfoSaver(mockBookingInfoRepository.Object);
+            AvailabilityInfoSaver infoSaver = new AvailabilityInfoSaver(
+                mockBookingInfoRepository.Object,
+                mockAvailabilityStatusMessageQueue.Object,
+                mockAvailabilityInfoDataProcessor.Object);
             infoSaver.SaveChanges(changes);
 
             // Assert
