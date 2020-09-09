@@ -8,6 +8,9 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CalendarIntegrationCore.Services.DataDownloading;
+using CalendarIntegrationCore.Services.DataProcessing;
+using CalendarIntegrationCore.Services.DataRetrieving;
 
 namespace CalendarIntegrationCore.Services
 {
@@ -20,7 +23,6 @@ namespace CalendarIntegrationCore.Services
         private readonly IAvailabilityInfoSaver _infoSaver;
         private readonly IAvailabilityInfoReceiver _infoReceiver;
         private readonly IAvailabilityInfoDataProcessor _dataProcessor;
-        private readonly IAvailabilityStatusMessageQueue _availStatusQueue;
         
         private readonly ICalendarParser _calendarParser;
         private readonly IAvailabilityStatusMessageQueue _queue;
@@ -35,8 +37,7 @@ namespace CalendarIntegrationCore.Services
             IBookingInfoRepository bookingInfoRepository,
             IAvailabilityStatusMessageQueue queue,
             ICalendarParser calendarParser,
-            ILogger<AvailabilityInfoService> logger,
-            IAvailabilityStatusMessageQueue availStatusQueue)
+            ILogger<AvailabilityInfoService> logger)
         {
             _hotelRepository = hotelRepository;
             _roomRepository = roomRepository;
@@ -47,7 +48,6 @@ namespace CalendarIntegrationCore.Services
             _calendarParser = calendarParser;
             _logger = logger;
             _queue = queue;
-            _availStatusQueue = availStatusQueue;
         }
 
         /// <summary>
@@ -86,8 +86,7 @@ namespace CalendarIntegrationCore.Services
                             try
                             {
                                 availabilityStatusMessages = _dataProcessor.FillGapsInDates(
-                                    availabilityStatusMessages,
-                                    currRoom.TLApiCode);
+                                    availabilityStatusMessages, currRoom.Id);
                             }
                             catch (Exception e)
                             {

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using CalendarIntegrationCore.Models;
 
-namespace CalendarIntegrationCore.Models
+namespace CalendarIntegrationCore.Services.DataProcessing
 {
     public interface ICalendarParser
     {

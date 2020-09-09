@@ -4,6 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services;
+using CalendarIntegrationCore.Services.DataRetrieving;
+using CalendarIntegrationCore.Services.DataUploading;
 using CalendarIntegrationCore.Services.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -12,18 +14,18 @@ using Microsoft.Extensions.Options;
 
 namespace CalendarIntegrationWeb.Services
 {
-    public class SendAvailabilityInfoBackgroundService : BackgroundService, IDisposable
+    public class UploadAvailabilityInfoBackgroundService : BackgroundService, IDisposable
     {
         private readonly TimeSpan _timerPeriod;
         private readonly int _dataPackageSize;
-        private readonly ILogger<SendAvailabilityInfoBackgroundService> _logger;
+        private readonly ILogger<UploadAvailabilityInfoBackgroundService> _logger;
         private readonly IAvailabilityStatusMessageQueue _queue;
         private readonly IAvailabilityInfoSender _infoSender;
         private readonly IServiceProvider _serviceProvider;
         
-        public SendAvailabilityInfoBackgroundService(
-            ILogger<SendAvailabilityInfoBackgroundService> logger,
-            IOptions<SendAvailabilityInfoBackgroundServiceOptions> options,
+        public UploadAvailabilityInfoBackgroundService(
+            ILogger<UploadAvailabilityInfoBackgroundService> logger,
+            IOptions<UploadAvailabilityInfoBackgroundServiceOptions> options,
             IAvailabilityStatusMessageQueue queue,
             IAvailabilityInfoSender infoSender,
             IServiceProvider serviceProvider)
@@ -38,17 +40,17 @@ namespace CalendarIntegrationWeb.Services
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("SendAvailabilityInfoHostedService background is starting");
+            _logger.LogInformation("UploadAvailabilityInfoBackgroundService background is starting");
             while (!cancellationToken.IsCancellationRequested)
             {
                 using (IServiceScope scope = _serviceProvider.CreateScope())
                 {
-                    List<AvailabilityStatusMessage> availMessages = _queue.DequeueMultiple(
-                        Math.Min(_dataPackageSize, _queue.Count));
+                    List<AvailabilityStatusMessage> availMessages = _queue.PeekMultiple(_dataPackageSize);
                     try
                     {
                         await _infoSender.SendAvailabilityInfo(availMessages, cancellationToken);
-                        _logger.LogInformation("Availability rooms information has been sent");
+                        _logger.LogInformation("Availability rooms information has been uploaded to TLConnect");
+                        _queue.DequeueMultiple(_dataPackageSize);
                     }
                     catch (Exception e)
                     {

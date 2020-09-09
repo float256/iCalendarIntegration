@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using CalendarIntegrationCore.Services.DataProcessing;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace CalendarIntegrationCore.Tests.Services
@@ -99,7 +101,8 @@ namespace CalendarIntegrationCore.Tests.Services
             };
 
             // Act
-            AvailabilityInfoDataProcessor infoSender = new AvailabilityInfoDataProcessor();
+            IOptions<AvailabilityInfoDataProcessorOptions> options = Options.Create(new AvailabilityInfoDataProcessorOptions());
+            AvailabilityInfoDataProcessor infoSender = new AvailabilityInfoDataProcessor(options);
             BookingInfoChanges actual = infoSender.GetChanges(newAvailabilityInfo, initialAvailabilityInfo);
 
             // Assert
@@ -133,7 +136,8 @@ namespace CalendarIntegrationCore.Tests.Services
             BookingInfoChanges expected = new BookingInfoChanges();
 
             // Act
-            AvailabilityInfoDataProcessor infoSender = new AvailabilityInfoDataProcessor();
+            IOptions<AvailabilityInfoDataProcessorOptions> options = Options.Create(new AvailabilityInfoDataProcessorOptions());
+            AvailabilityInfoDataProcessor infoSender = new AvailabilityInfoDataProcessor(options);
             BookingInfoChanges actual = infoSender.GetChanges(newAvailabilityInfo, initialAvailabilityInfo);
 
             // Assert

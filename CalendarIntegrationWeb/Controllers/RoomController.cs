@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services;
+using CalendarIntegrationCore.Services.DataDownloading;
 using CalendarIntegrationCore.Services.Repositories;
 using CalendarIntegrationWeb.Dto;
 using Microsoft.AspNetCore.Http;
@@ -15,13 +16,15 @@ namespace CalendarIntegrationWeb.Controllers
     [ApiController]
     public class RoomController : ControllerBase
     {
-        private IRoomRepository _roomRepository;
-        private IHotelRepository _hotelRepository;
+        private readonly IRoomRepository _roomRepository;
+        private readonly IHotelRepository _hotelRepository;
+        private readonly IAvailabilityInfoSaver _infoSaver;
 
-        public RoomController(IRoomRepository roomRepository, IHotelRepository hotelRepository)
+        public RoomController(IRoomRepository roomRepository, IHotelRepository hotelRepository, IAvailabilityInfoSaver infoSaver)
         {
             _roomRepository = roomRepository;
             _hotelRepository = hotelRepository;
+            _infoSaver = infoSaver;
         }
 
         [HttpGet("{id:int}")]
@@ -98,14 +101,21 @@ namespace CalendarIntegrationWeb.Controllers
         [HttpPost("Update")]
         public void Update(RoomDto roomDto)
         {
-            _roomRepository.Update(new Room
+            Room previousRoomValues = _roomRepository.Get(roomDto.Id);
+            _roomRepository.Detach(previousRoomValues);
+            Room newRoomValues = new Room
             {
                 Id = roomDto.Id,
                 HotelId = roomDto.HotelId,
                 Name = roomDto.Name,
                 TLApiCode = roomDto.TLApiCode,
                 Url = roomDto.Url
-            });
+            };
+            if (previousRoomValues.TLApiCode != roomDto.TLApiCode)
+            {
+                _infoSaver.AddAllBookingInfoForRoomInQueue(newRoomValues, isFillGaps: true);
+            }
+            _roomRepository.Update(newRoomValues);
         }
 
         [HttpPost("Delete")]

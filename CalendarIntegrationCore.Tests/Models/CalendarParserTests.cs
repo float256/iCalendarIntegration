@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using CalendarIntegrationCore.Models;
+using CalendarIntegrationCore.Services;
+using CalendarIntegrationCore.Services.DataProcessing;
 using Xunit;
 using Moq;
 

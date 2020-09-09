@@ -19,8 +19,5 @@ namespace CalendarIntegrationCore.Models
 
         [Column("state")]
         public BookingLimitType State { get; set; }
-
-        [Column("tl_api_code")]
-        public string TLApiCode { get; set; }
     }
 }

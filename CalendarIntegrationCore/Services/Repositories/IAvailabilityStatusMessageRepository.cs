@@ -14,6 +14,7 @@ namespace CalendarIntegrationCore.Services.Repositories
         AvailabilityStatusMessage Get(int id);
         List<AvailabilityStatusMessage> GetByRoom(int roomId);
         List<AvailabilityStatusMessage> GetAll();
+        List<AvailabilityStatusMessage> GetTop(int numberOfValues);
         AvailabilityStatusMessage GetFirst();
         AvailabilityStatusMessage GetLast();
     }

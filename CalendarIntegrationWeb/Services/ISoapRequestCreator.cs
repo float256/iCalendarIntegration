@@ -9,7 +9,10 @@ namespace CalendarIntegrationWeb.Services
 {
     public interface ISoapRequestCreator
     {
-        HotelAvailNotifRQRequest CreateRequest(List<AvailabilityStatusMessage> availStatuses,
-            string username, string password, string hotelCode);
+        HotelAvailNotifRQRequest CreateRequest(
+            Dictionary<Room, List<AvailabilityStatusMessage>> availStatuses,
+            string username,
+            string password,
+            string hotelCode);
     }
 }

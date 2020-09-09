@@ -9,15 +9,15 @@ using Microsoft.Extensions.Options;
 
 namespace CalendarIntegrationWeb.Services
 {
-    public class SaveAvailabilityInfoBackgroundService : BackgroundService, IDisposable
+    public class DownloadAvailabilityInfoBackgroundService : BackgroundService, IDisposable
     {
         private readonly TimeSpan _timerPeriod;
-        private readonly ILogger<SaveAvailabilityInfoBackgroundService> _logger;
+        private readonly ILogger<DownloadAvailabilityInfoBackgroundService> _logger;
         private readonly IServiceProvider _serviceProvider;
 
-        public SaveAvailabilityInfoBackgroundService(
-            ILogger<SaveAvailabilityInfoBackgroundService> logger,
-            IOptions<SaveAvailabilityInfoBackgroundServiceOptions> options,
+        public DownloadAvailabilityInfoBackgroundService(
+            ILogger<DownloadAvailabilityInfoBackgroundService> logger,
+            IOptions<DownloadAvailabilityInfoBackgroundServiceOptions> options,
             IServiceProvider serviceProvider)
         {
             _logger = logger;
@@ -27,7 +27,7 @@ namespace CalendarIntegrationWeb.Services
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("SaveAvailabilityInfoHostedService background is starting");
+            _logger.LogInformation("DownloadAvailabilityInfoBackgroundService background is starting");
             while (!cancellationToken.IsCancellationRequested)
             {
                 using (IServiceScope scope = _serviceProvider.CreateScope())
@@ -35,7 +35,7 @@ namespace CalendarIntegrationWeb.Services
                     IAvailabilityInfoService availabilityService = scope.ServiceProvider.GetRequiredService<IAvailabilityInfoService>();
                     availabilityService.ProcessAllInfo(cancellationToken);
                 }
-                _logger.LogInformation("Availability rooms information has been saved");
+                _logger.LogInformation("Availability rooms information has been downloaded");
                 await Task.Delay(_timerPeriod, cancellationToken);
             }
         }

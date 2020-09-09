@@ -7,6 +7,7 @@ using System.Linq;
 using System.ServiceModel;
 using System.Threading;
 using System.Threading.Tasks;
+using CalendarIntegrationCore.Services.DataUploading;
 using CalendarIntegrationCore.Services.Repositories;
 using CalendarIntegrationWeb.Dto;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -42,15 +43,30 @@ namespace CalendarIntegrationWeb.Services
         {
             if (!cancellationToken.IsCancellationRequested)
             {
-                var availStatusesWithHotelInfo = (from availStatus in availStatuses
-                    join room in _roomRepository.GetAll() on availStatus.RoomId equals room.Id
-                    join hotel in _hotelRepository.GetAll() on room.HotelId equals hotel.Id
-                    group availStatus by hotel);
-                foreach (var availStatusGroup in availStatusesWithHotelInfo)
+                List<Room> roomsForAvailStatuses = _roomRepository.GetMultiple(
+                    availStatuses.Select(elem => elem.RoomId).ToList());
+                List<Hotel> hotelsForRooms = _hotelRepository.GetMultiple(
+                    roomsForAvailStatuses.Select(elem => elem.HotelId).ToList());
+                List<IGrouping<Room, AvailabilityStatusMessage>> availStatusesGroupedByRooms = (
+                    from availStatus in availStatuses
+                    join room in roomsForAvailStatuses on availStatus.RoomId equals room.Id
+                    group availStatus by room).ToList();
+                List<IGrouping<Hotel, IGrouping<Room, AvailabilityStatusMessage>>> availStatusesGroupedByRoomsAndHotels = (
+                    from groupedAvailStatuses in availStatusesGroupedByRooms
+                    join hotel in hotelsForRooms on groupedAvailStatuses.Key.HotelId equals hotel.Id
+                    group groupedAvailStatuses by hotel).ToList();
+                foreach (var roomGroup in availStatusesGroupedByRoomsAndHotels)
                 {
-                    Hotel currHotel = availStatusGroup.Key;
-                    List<AvailabilityStatusMessage> availStatusMessagesForCurrHotel = availStatusGroup.ToList();
-                    var request = _soapRequestCreator.CreateRequest(availStatusMessagesForCurrHotel, currHotel.Login,
+                    Hotel currHotel = roomGroup.Key;
+                    Dictionary<Room, List<AvailabilityStatusMessage>> availStatusesDict = new Dictionary<Room, 
+                        List<AvailabilityStatusMessage>>();
+                    foreach (var currRoomGroup in roomGroup)
+                    {
+                        availStatusesDict.Add(currRoomGroup.Key, currRoomGroup.ToList());
+                    }
+                    HotelAvailNotifRQRequest request = _soapRequestCreator.CreateRequest(
+                        availStatusesDict, 
+                        currHotel.Login,
                         currHotel.Password,
                         currHotel.HotelCode);
                     await _tlConnectService.HotelAvailNotifRQAsync(request);

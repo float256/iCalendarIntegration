@@ -1,15 +1,10 @@
-﻿using CalendarIntegrationCore.Models;
-using CalendarIntegrationCore.Services.Repositories;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 
-namespace CalendarIntegrationCore.Services
+namespace CalendarIntegrationCore.Services.DataRetrieving
 {
     public class AvailabilityInfoReceiver : IAvailabilityInfoReceiver
     {

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using TLConnect;
 
 namespace CalendarIntegrationWeb.Services
@@ -16,13 +17,16 @@ namespace CalendarIntegrationWeb.Services
             { BookingLimitType.Occupied, "0" }
         };
         
-        public SoapRequestCreator(string dateFormat = "yyyy-MM-ddTHH:mm:ss.fffffff")
+        public SoapRequestCreator(string dateFormat = "yyyy-MM-dd")
         {
             _dateFormat = dateFormat;
         }
 
-        public HotelAvailNotifRQRequest CreateRequest(List<AvailabilityStatusMessage> availStatuses,
-            string username, string password, string hotelCode)
+        public HotelAvailNotifRQRequest CreateRequest(
+            Dictionary<Room, List<AvailabilityStatusMessage>> availStatuses,
+            string username,
+            string password,
+            string hotelCode)
         {
             HotelAvailNotifRQRequest request = new HotelAvailNotifRQRequest();
             List<AvailStatusMessageType> availStatusMessages = new List<AvailStatusMessageType>();
@@ -37,18 +41,21 @@ namespace CalendarIntegrationWeb.Services
                 TimeStamp = DateTime.Now,
                 AvailStatusMessages = new OTA_HotelAvailNotifRQAvailStatusMessages { HotelCode = hotelCode },
             };
-            foreach (AvailabilityStatusMessage currAvailStatus in availStatuses)
+            foreach (Room currRoom in availStatuses.Keys)
             {
-                availStatusMessages.Add(new AvailStatusMessageType
+                foreach (var currAvailStatus in availStatuses[currRoom])
                 {
-                    BookingLimit = _bookingLimitAsString[currAvailStatus.State],
-                    StatusApplicationControl = new StatusApplicationControlType
+                    availStatusMessages.Add(new AvailStatusMessageType
                     {
-                        Start = currAvailStatus.StartDate.ToString(_dateFormat),
-                        End = currAvailStatus.EndDate.ToString(_dateFormat),
-                        InvTypeCode = currAvailStatus.TLApiCode
-                    }
-                });
+                        BookingLimit = _bookingLimitAsString[currAvailStatus.State],
+                        StatusApplicationControl = new StatusApplicationControlType
+                        {
+                            Start = currAvailStatus.StartDate.ToString(_dateFormat),
+                            End = currAvailStatus.EndDate.ToString(_dateFormat),
+                            InvTypeCode = currRoom.TLApiCode
+                        }
+                    });
+                }
             }
             request.OTA_HotelAvailNotifRQ.AvailStatusMessages.AvailStatusMessage = availStatusMessages.ToArray();
             return request;

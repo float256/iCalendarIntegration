@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace CalendarIntegrationWeb.Services
 {
-    public class SaveAvailabilityInfoBackgroundServiceOptions
+    public class DownloadAvailabilityInfoBackgroundServiceOptions
     {
         public int SavingPeriodInSeconds { get; set; }
     }

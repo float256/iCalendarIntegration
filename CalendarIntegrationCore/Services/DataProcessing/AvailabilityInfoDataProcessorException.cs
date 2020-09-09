@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CalendarIntegrationCore.Services
+namespace CalendarIntegrationCore.Services.DataProcessing
 {
     public class AvailabilityInfoDataProcessorException: Exception
     {

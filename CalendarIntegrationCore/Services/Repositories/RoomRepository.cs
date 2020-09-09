@@ -12,12 +12,10 @@ namespace CalendarIntegrationCore.Services.Repositories
     public class RoomRepository: IRoomRepository
     {
         private readonly ApplicationContext _context;
-        private readonly IAvailabilityInfoSaver _infoSaver;
         
-        public RoomRepository(ApplicationContext context, IAvailabilityInfoSaver infoSaver)
+        public RoomRepository(ApplicationContext context)
         {
             _context = context;
-            _infoSaver = infoSaver;
         }
 
         public Room Get(int id)
@@ -25,11 +23,16 @@ namespace CalendarIntegrationCore.Services.Repositories
             return _context.RoomSet.SingleOrDefault(x => x.Id == id);
         }
 
+        public List<Room> GetMultiple(List<int> roomIndexes)
+        {
+            return _context.RoomSet.Where(room => roomIndexes.Contains(room.Id)).ToList();
+        }
+        
         public List<Room> GetByHotelId(int hotelId)
         {
             return _context.RoomSet.Where(room => room.HotelId == hotelId).ToList();
         }
-
+        
         public List<Room> GetAll()
         {
             return _context.RoomSet.ToList();
@@ -50,15 +53,14 @@ namespace CalendarIntegrationCore.Services.Repositories
 
         public void Update(Room room)
         {
-            Room previousRoomValues = _context.RoomSet.Find(room.Id);
-            _context.Entry(previousRoomValues).State = EntityState.Detached;
-            if (previousRoomValues.TLApiCode != room.TLApiCode)
-            {
-                _infoSaver.AddAllBookingInfoForRoomInQueue(room, isFillGaps: true);
-            }
             _context.RoomSet.Update(room);
             _context.Entry(room).State = EntityState.Modified;
             _context.SaveChanges();
+        }
+
+        public void Detach(Room room)
+        {
+            _context.Entry(room).State = EntityState.Detached;
         }
     }
 }

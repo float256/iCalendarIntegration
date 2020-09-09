@@ -1,13 +1,19 @@
-﻿using CalendarIntegrationCore.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using CalendarIntegrationCore.Models;
+using Microsoft.Extensions.Options;
 
-namespace CalendarIntegrationCore.Services
+namespace CalendarIntegrationCore.Services.DataProcessing
 {
     public class AvailabilityInfoDataProcessor: IAvailabilityInfoDataProcessor
     {
+        private readonly int _autofillRangeInDays;
+        
+        public AvailabilityInfoDataProcessor(IOptions<AvailabilityInfoDataProcessorOptions> options)
+        {
+            _autofillRangeInDays = options.Value.AutofillRangeInDays;
+        }
         
         /// <summary>
         /// Метод ищет отличия между двумя списками объектов BookingInfo и возвращает их в виде объекта BookingInfoChanges. 
@@ -20,18 +26,20 @@ namespace CalendarIntegrationCore.Services
         public BookingInfoChanges GetChanges(List<BookingInfo> newAvailabilityInfo, List<BookingInfo> initialAvailabilityInfo)
         {
             BookingInfoChanges changes = new BookingInfoChanges();
+            List<BookingInfo> initialAvailabilityInfoCopy = initialAvailabilityInfo.GetRange(0, initialAvailabilityInfo.Count);
+
             foreach (BookingInfo newBookingInfo in newAvailabilityInfo)
             {
                 bool isFoundMatchingInitialBookingInfo = false;
-                for (int i = 0; i < initialAvailabilityInfo.Count; i++)
+                for (int i = 0; i < initialAvailabilityInfoCopy.Count; i++)
                 {
-                    BookingInfo initialBookingInfo = initialAvailabilityInfo[i];
+                    BookingInfo initialBookingInfo = initialAvailabilityInfoCopy[i];
                     isFoundMatchingInitialBookingInfo = (initialBookingInfo.RoomId == newBookingInfo.RoomId) &&
                                                         (initialBookingInfo.StartBooking == newBookingInfo.StartBooking) &&
                                                         (initialBookingInfo.EndBooking == newBookingInfo.EndBooking);
                     if (isFoundMatchingInitialBookingInfo)
                     {
-                        initialAvailabilityInfo.Remove(initialBookingInfo);
+                        initialAvailabilityInfoCopy.Remove(initialBookingInfo);
                         break;
                     }
                 }
@@ -40,7 +48,7 @@ namespace CalendarIntegrationCore.Services
                     changes.AddedBookingInfo.Add(newBookingInfo);
                 }
             }
-            foreach (BookingInfo remainingInitialBookingInfo in initialAvailabilityInfo)
+            foreach (BookingInfo remainingInitialBookingInfo in initialAvailabilityInfoCopy)
             {
                 changes.RemovedBookingInfo.Add(remainingInitialBookingInfo);
             }
@@ -55,19 +63,29 @@ namespace CalendarIntegrationCore.Services
         /// <param name="bookingInfoForOccupiedRooms">
         /// Список, содержащий информацию о доступности комнаты в определенные промежутки
         /// </param>
-        /// <param name="tlApiCode">TLApiCode комнаты, для которой вычисляется информация
-        /// о доступности комнаты в неуказанные дни</param>
+        /// <param name="roomId">Id комнаты, для которой заполняются пропуски в датах</param>
         /// <returns>
         /// Список, недостающие даты в котором заполнены 
         /// </returns>
         public List<AvailabilityStatusMessage> FillGapsInDates(
             List<AvailabilityStatusMessage> bookingInfoForOccupiedRooms,
-            string tlApiCode)
+            int roomId)
         {
             List<AvailabilityStatusMessage> result = new List<AvailabilityStatusMessage>();
-
-            if (bookingInfoForOccupiedRooms.Count <= 0)
+            DateTime autofillRangeDate = DateTime.Now.Add(TimeSpan.FromDays(_autofillRangeInDays)); 
+            
+            if (bookingInfoForOccupiedRooms.Count == 0)
             {
+                if (_autofillRangeInDays != 0)
+                {
+                    result.Add(new AvailabilityStatusMessage
+                    {
+                        StartDate = DateTime.Today,
+                        EndDate = autofillRangeDate,
+                        RoomId = roomId,
+                        State = BookingLimitType.Available,
+                    });                    
+                }
                 return result;
             }
             if (bookingInfoForOccupiedRooms[0].StartDate > DateTime.Now)
@@ -76,9 +94,8 @@ namespace CalendarIntegrationCore.Services
                 {
                     StartDate = DateTime.Today,
                     EndDate = bookingInfoForOccupiedRooms[0].StartDate,
-                    RoomId = bookingInfoForOccupiedRooms[0].RoomId,
+                    RoomId = roomId,
                     State = BookingLimitType.Available,
-                    TLApiCode = tlApiCode
                 });
             }
             for (int i = 0; i < bookingInfoForOccupiedRooms.Count - 1; i++)
@@ -91,10 +108,6 @@ namespace CalendarIntegrationCore.Services
                 {
                     throw new AvailabilityInfoDataProcessorException("Intersection of dates is not allowed");
                 }
-                else if (currAvailabilityStatusMessage.RoomId != nextAvailabilityStatusMessage.RoomId)
-                {
-                    throw new AvailabilityInfoDataProcessorException("RoomId values must be the same for list items");
-                }
                 else
                 {
                     result.Add(currAvailabilityStatusMessage);
@@ -102,13 +115,22 @@ namespace CalendarIntegrationCore.Services
                     {
                         StartDate = currAvailabilityStatusMessage.EndDate,
                         EndDate = nextAvailabilityStatusMessage.StartDate,
-                        RoomId = currAvailabilityStatusMessage.RoomId,
+                        RoomId = roomId,
                         State = BookingLimitType.Available,
-                        TLApiCode = tlApiCode
                     });
                 }
             }
             result.Add(bookingInfoForOccupiedRooms.Last());
+            if (bookingInfoForOccupiedRooms.Last().EndDate < autofillRangeDate)
+            {
+                result.Add(new AvailabilityStatusMessage
+                {
+                    StartDate = bookingInfoForOccupiedRooms.Last().EndDate,
+                    EndDate = autofillRangeDate,
+                    RoomId = roomId,
+                    State = BookingLimitType.Available,
+                });
+            }
             return result;
         }
 
@@ -134,7 +156,6 @@ namespace CalendarIntegrationCore.Services
                     StartDate = bookingInfo.StartBooking,
                     EndDate = bookingInfo.EndBooking,
                     State = BookingLimitType.Available,
-                    TLApiCode = tlApiCode
                 });
             }
             foreach (BookingInfo bookingInfo in infoChanges.AddedBookingInfo)
@@ -145,7 +166,6 @@ namespace CalendarIntegrationCore.Services
                     StartDate = bookingInfo.StartBooking,
                     EndDate = bookingInfo.EndBooking,
                     State = BookingLimitType.Occupied,
-                    TLApiCode = tlApiCode
                 });
             }
             return result;

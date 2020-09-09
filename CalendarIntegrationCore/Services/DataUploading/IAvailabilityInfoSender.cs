@@ -1,11 +1,9 @@
-﻿using CalendarIntegrationCore.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using CalendarIntegrationCore.Models;
 
-namespace CalendarIntegrationCore.Services
+namespace CalendarIntegrationCore.Services.DataUploading
 {
     public interface IAvailabilityInfoSender
     {

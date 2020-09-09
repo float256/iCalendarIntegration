@@ -2,15 +2,13 @@
 using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services.Repositories;
 
-namespace CalendarIntegrationCore.Services
+namespace CalendarIntegrationCore.Services.DataRetrieving
 {
-    public class AvailabilityStatusMessageMessageQueue : IAvailabilityStatusMessageQueue
+    public class AvailabilityStatusMessageQueue : IAvailabilityStatusMessageQueue
     {
         private readonly IAvailabilityStatusMessageRepository _availabilityStatusMessageRepository;
 
-        public int Count => _availabilityStatusMessageRepository.Count;
-
-        public AvailabilityStatusMessageMessageQueue(IAvailabilityStatusMessageRepository availabilityStatusMessageRepository)
+        public AvailabilityStatusMessageQueue(IAvailabilityStatusMessageRepository availabilityStatusMessageRepository)
         {
             _availabilityStatusMessageRepository = availabilityStatusMessageRepository;
         }
@@ -52,6 +50,18 @@ namespace CalendarIntegrationCore.Services
             return _availabilityStatusMessageRepository.GetFirst();
         }
 
+        
+        /// <summary>
+        /// Данный метод возвращает указанное количество элементов из очереди
+        /// </summary>
+        /// <param name="numberOfElements">Количество элементов, которое необходимо вернуть</param>
+        /// <returns></returns>
+        public List<AvailabilityStatusMessage> PeekMultiple(int numberOfElements)
+        {
+            List<AvailabilityStatusMessage> result = _availabilityStatusMessageRepository.GetTop(numberOfElements);
+            return result;
+        }
+        
         /// <summary>
         /// Данный метод удаляет первый элемент из очереди и возвращает его
         /// </summary>
@@ -64,17 +74,15 @@ namespace CalendarIntegrationCore.Services
             _availabilityStatusMessageRepository.Delete(firstElement);
             return firstElement;
         }
-
+        
         /// <summary>
-        /// Данный метод удаляет указанное количество элементов из очереди и возвращает их
+        /// Данный метод удаляет из начала очереди указанное количество элементов
         /// </summary>
-        /// <param name="numberOfElements">Количество элементов, которое необходимо вернуть</param>
-        /// <returns></returns>
-        public List<AvailabilityStatusMessage> DequeueMultiple(int numberOfElements)
+        /// <param name="numberOfElements">Количество элементов, которое необходимо удалить</param>
+        public void DequeueMultiple(int numberOfElements)
         {
-            List<AvailabilityStatusMessage> result = _availabilityStatusMessageRepository.GetAll().GetRange(0, numberOfElements);
+            List<AvailabilityStatusMessage> result = _availabilityStatusMessageRepository.GetTop(numberOfElements);
             _availabilityStatusMessageRepository.DeleteMultiple(result);
-            return result;
         }
     }
 }

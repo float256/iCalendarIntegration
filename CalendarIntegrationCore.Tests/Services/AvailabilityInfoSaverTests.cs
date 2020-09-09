@@ -5,6 +5,10 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using CalendarIntegrationCore.Services.DataDownloading;
+using CalendarIntegrationCore.Services.DataProcessing;
+using CalendarIntegrationCore.Services.DataRetrieving;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace CalendarIntegrationCore.Tests.Services
@@ -119,10 +123,12 @@ namespace CalendarIntegrationCore.Tests.Services
                 });
 
             // Act
+            IOptions<AvailabilityInfoSaverOptions> options = Options.Create(new AvailabilityInfoSaverOptions());
             AvailabilityInfoSaver infoSaver = new AvailabilityInfoSaver(
                 mockBookingInfoRepository.Object,
                 mockAvailabilityStatusMessageQueue.Object,
-                mockAvailabilityInfoDataProcessor.Object);
+                mockAvailabilityInfoDataProcessor.Object,
+                options);
             infoSaver.SaveChanges(changes);
 
             // Assert
@@ -199,10 +205,12 @@ namespace CalendarIntegrationCore.Tests.Services
                 });
 
             // Act
+            IOptions<AvailabilityInfoSaverOptions> options = Options.Create(new AvailabilityInfoSaverOptions());
             AvailabilityInfoSaver infoSaver = new AvailabilityInfoSaver(
                 mockBookingInfoRepository.Object,
                 mockAvailabilityStatusMessageQueue.Object,
-                mockAvailabilityInfoDataProcessor.Object);
+                mockAvailabilityInfoDataProcessor.Object,
+                options);
             infoSaver.SaveChanges(changes);
 
             // Assert

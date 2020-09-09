@@ -55,10 +55,10 @@ namespace CalendarIntegrationCore.Services.Repositories
             return _context.AvailabilityStatusMessageSet.ToList();
         }
 
-        public List<AvailabilityStatusMessage> GetRange(int startPosition, int b)
+        public List<AvailabilityStatusMessage> GetTop(int numberOfValues)
         {
-
-            return _context.AvailabilityStatusMessageSet.Skip(startPosition).Take(b).ToList();
+            return _context.AvailabilityStatusMessageSet.OrderBy(elem => elem.Id)
+                .Take(numberOfValues).ToList();
         }
         
         public AvailabilityStatusMessage GetFirst()

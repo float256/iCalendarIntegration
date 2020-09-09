@@ -24,8 +24,8 @@ namespace CalendarIntegrationCore.Services
             builder.Entity<BookingInfo>().ToTable("booking_info");
             builder.Entity<AvailabilityStatusMessage>().ToTable("availability_status_message");
             builder.Entity<AvailabilityStatusMessage>().Property(c => c.State).HasConversion(
-                entity => entity.ToString(),
-                entity => (BookingLimitType)Enum.Parse(typeof(BookingLimitType), entity));
+                entity => (int) entity,
+                entity => (BookingLimitType) entity);
         }
     }
 }

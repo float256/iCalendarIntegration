@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CalendarIntegrationCore.Services.DataRetrieving;
 using Xunit;
 
 namespace CalendarIntegrationCore.Tests.Services

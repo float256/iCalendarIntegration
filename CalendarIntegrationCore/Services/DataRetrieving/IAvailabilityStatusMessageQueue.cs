@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
 using CalendarIntegrationCore.Models;
 
-namespace CalendarIntegrationCore.Services
+namespace CalendarIntegrationCore.Services.DataRetrieving
 {
     public interface IAvailabilityStatusMessageQueue
     {
-        int Count { get; }
         void Enqueue(AvailabilityStatusMessage availabilityStatusMessage);
         void EnqueueMultiple(List<AvailabilityStatusMessage> availabilityStatusMessages);
         AvailabilityStatusMessage Peek();
+        List<AvailabilityStatusMessage> PeekMultiple(int numberOfElements);
         AvailabilityStatusMessage Dequeue();
-        List<AvailabilityStatusMessage> DequeueMultiple(int numberOfElements);
+        void DequeueMultiple(int numberOfElements);
     }
 }

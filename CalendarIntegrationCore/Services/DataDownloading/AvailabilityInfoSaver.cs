@@ -1,25 +1,30 @@
-﻿using CalendarIntegrationCore.Models;
-using CalendarIntegrationCore.Services.Repositories;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using CalendarIntegrationCore.Models;
+using CalendarIntegrationCore.Services.DataProcessing;
+using CalendarIntegrationCore.Services.DataRetrieving;
+using CalendarIntegrationCore.Services.Repositories;
+using Microsoft.Extensions.Options;
 
-namespace CalendarIntegrationCore.Services
+namespace CalendarIntegrationCore.Services.DataDownloading
 {
     public class AvailabilityInfoSaver: IAvailabilityInfoSaver
     {
         private readonly IBookingInfoRepository _bookingInfoRepository;
         private readonly IAvailabilityStatusMessageQueue _availabilityStatusMessageQueue;
         private readonly IAvailabilityInfoDataProcessor _dataProcessor;
+        private readonly int _upperBoundForLoadedDatesInDays;
         
         public AvailabilityInfoSaver(
             IBookingInfoRepository bookingInfoRepository, 
             IAvailabilityStatusMessageQueue availabilityStatusMessageQueue,
-            IAvailabilityInfoDataProcessor dataProcessor)
+            IAvailabilityInfoDataProcessor dataProcessor,
+            IOptions<AvailabilityInfoSaverOptions> options)
         {
             _bookingInfoRepository = bookingInfoRepository;
             _availabilityStatusMessageQueue = availabilityStatusMessageQueue;
             _dataProcessor = dataProcessor;
+            _upperBoundForLoadedDatesInDays = options.Value.UpperBoundForLoadedDatesInDays;
         }
 
         /// <summary>
@@ -48,20 +53,15 @@ namespace CalendarIntegrationCore.Services
         /// <param name="roomId">Объект комнаты, для которой добавляются значения о доступности в БД</param>
         /// <param name="isFillGaps">Если значение равно true, то промежутки между датами заполняются информацией
         /// о доступности комнаты</param>
-        /// <param name="upperBoundForLoadedDatesInDays">Верхняя граница для присваеваемых значений. Если запись о
-        /// бронировании находится после даты DateTime.Now.Add(upperBoundForLoadedDatesInDays), то эта запись удаляется
-        /// из таблицы booking_info. Также она не сохраняется в availability_status_message. Если значение меньше нуля,
-        /// то верхняя граница не устанавливается</param>
-        public void AddAllBookingInfoForRoomInQueue(Room room, bool isFillGaps = false, 
-            int upperBoundForLoadedDatesInDays = 730)
+        public void AddAllBookingInfoForRoomInQueue(Room room, bool isFillGaps = false)
         {
             List<BookingInfo> allBookingInfoForRoom = _bookingInfoRepository.GetByRoomId(room.Id);
             List<AvailabilityStatusMessage> dateChangeStatusesForRoom = new List<AvailabilityStatusMessage>();
             List<BookingInfo> bookingInfosForDeleting = new List<BookingInfo>();
             foreach (BookingInfo bookingInfo in allBookingInfoForRoom)
             {
-                if ((DateTime.Now.Add(TimeSpan.FromDays(upperBoundForLoadedDatesInDays)) > bookingInfo.StartBooking) &&
-                    (upperBoundForLoadedDatesInDays > 0))
+                if ((DateTime.Now.Add(TimeSpan.FromDays(_upperBoundForLoadedDatesInDays)) > bookingInfo.StartBooking) &&
+                    (_upperBoundForLoadedDatesInDays > 0))
                 {
                     bookingInfosForDeleting.Add(bookingInfo);
                 }
@@ -82,9 +82,7 @@ namespace CalendarIntegrationCore.Services
             }
             if (isFillGaps)
             {
-                dateChangeStatusesForRoom = _dataProcessor.FillGapsInDates(
-                    dateChangeStatusesForRoom, 
-                    room.TLApiCode);
+                dateChangeStatusesForRoom = _dataProcessor.FillGapsInDates(dateChangeStatusesForRoom, room.Id);
             }
             _availabilityStatusMessageQueue.EnqueueMultiple(dateChangeStatusesForRoom);
         }

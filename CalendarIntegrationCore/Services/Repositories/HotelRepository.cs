@@ -12,7 +12,7 @@ namespace CalendarIntegrationCore.Services.Repositories
 {
     public class HotelRepository: IHotelRepository
     {
-        private ApplicationContext _context;
+        private readonly ApplicationContext _context;
 
         public HotelRepository(ApplicationContext context)
         {
@@ -21,9 +21,14 @@ namespace CalendarIntegrationCore.Services.Repositories
         
         public Hotel Get(int id)
         {
-            return _context.HotelSet.Where(x => x.Id == id).SingleOrDefault();
+            return _context.HotelSet.SingleOrDefault(x => x.Id == id);
         }
 
+        public List<Hotel> GetMultiple(List<int> hotelIndexes)
+        {
+            return _context.HotelSet.Where(hotel => hotelIndexes.Contains(hotel.Id)).ToList();
+        }
+        
         public List<Hotel> GetAll()
         {
             return _context.HotelSet.ToList();
@@ -47,6 +52,11 @@ namespace CalendarIntegrationCore.Services.Repositories
             _context.HotelSet.Update(hotel);
             _context.Entry(hotel).State = EntityState.Modified;
             _context.SaveChanges();
+        }
+
+        public void Detach(Hotel hotel)
+        {
+            _context.Entry(hotel).State = EntityState.Detached;
         }
     }
 }

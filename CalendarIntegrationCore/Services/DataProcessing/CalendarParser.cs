@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using CalendarIntegrationCore.Models;
 
-namespace CalendarIntegrationCore.Models
+namespace CalendarIntegrationCore.Services.DataProcessing
 {
     public class CalendarParser: ICalendarParser
     {
-        private static List<string> _dateParsingFormats = new List<string>{ "yyyyMMdd", "yyyyMMddTHHmmssZ" };
+        private readonly List<string> _dateParsingFormats = new List<string>{ "yyyyMMdd", "yyyyMMddTHHmmssZ" };
         
         private enum ParserState
         {
