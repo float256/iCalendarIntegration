@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services;
 using CalendarIntegrationCore.Services.DataDownloading;
+using CalendarIntegrationCore.Services.DataProcessing;
+using CalendarIntegrationCore.Services.DataRetrieving;
 using CalendarIntegrationCore.Services.Repositories;
 using CalendarIntegrationWeb.Dto;
 using Microsoft.AspNetCore.Http;
@@ -20,7 +22,10 @@ namespace CalendarIntegrationWeb.Controllers
         private readonly IHotelRepository _hotelRepository;
         private readonly IAvailabilityInfoSaver _infoSaver;
 
-        public RoomController(IRoomRepository roomRepository, IHotelRepository hotelRepository, IAvailabilityInfoSaver infoSaver)
+        public RoomController(
+            IRoomRepository roomRepository,
+            IHotelRepository hotelRepository,
+            IAvailabilityInfoSaver infoSaver)
         {
             _roomRepository = roomRepository;
             _hotelRepository = hotelRepository;
@@ -113,7 +118,7 @@ namespace CalendarIntegrationWeb.Controllers
             };
             if (previousRoomValues.TLApiCode != roomDto.TLApiCode)
             {
-                _infoSaver.AddAllBookingInfoForRoomInQueue(newRoomValues, isFillGaps: true);
+                _infoSaver.CreateAvailabilityStatusMessagesForRoom(newRoomValues, isFillGaps: true);
             }
             _roomRepository.Update(newRoomValues);
         }

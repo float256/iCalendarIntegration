@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using CalendarIntegrationCore.Models;
-using CalendarIntegrationCore.Services;
 using CalendarIntegrationCore.Services.DataProcessing;
 using Xunit;
-using Moq;
 
-namespace CalendarIntegrationCore.Tests.Models
+namespace CalendarIntegrationCore.Tests.Services
 {
     public class CalendarParserTests
     {

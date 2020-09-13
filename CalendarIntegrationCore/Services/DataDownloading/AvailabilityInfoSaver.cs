@@ -53,7 +53,7 @@ namespace CalendarIntegrationCore.Services.DataDownloading
         /// <param name="roomId">Объект комнаты, для которой добавляются значения о доступности в БД</param>
         /// <param name="isFillGaps">Если значение равно true, то промежутки между датами заполняются информацией
         /// о доступности комнаты</param>
-        public void AddAllBookingInfoForRoomInQueue(Room room, bool isFillGaps = false)
+        public void CreateAvailabilityStatusMessagesForRoom(Room room, bool isFillGaps = false)
         {
             List<BookingInfo> allBookingInfoForRoom = _bookingInfoRepository.GetByRoomId(room.Id);
             List<AvailabilityStatusMessage> dateChangeStatusesForRoom = new List<AvailabilityStatusMessage>();

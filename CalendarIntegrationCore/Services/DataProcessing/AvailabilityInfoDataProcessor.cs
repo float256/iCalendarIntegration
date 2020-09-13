@@ -17,29 +17,29 @@ namespace CalendarIntegrationCore.Services.DataProcessing
         
         /// <summary>
         /// Метод ищет отличия между двумя списками объектов BookingInfo и возвращает их в виде объекта BookingInfoChanges. 
-        /// Если какой-либо из объектов содержится в newAvailabilityInfo, но не содержится в initialAvailabilityInfo, он 
+        /// Если какой-либо из объектов содержится в newBookingInfos, но не содержится в initialBookingInfos, он 
         /// добавляется в BookingInfoChanges.AddedBookingInfo. В противоположном случае, он добавляется в BookingInfoChanges.RemovedBookingInfo
         /// </summary>
-        /// <param name="newAvailabilityInfo">Новые данные о занятости комнаты</param>
-        /// <param name="initialAvailabilityInfo">Изначальные данные о занятости комнаты</param>
+        /// <param name="newBookingInfos">Новые данные о занятости комнаты</param>
+        /// <param name="initialBookingInfos">Изначальные данные о занятости комнаты</param>
         /// <returns>Объект BookingInfoChanges, содержащий информацию о различии изначальных и новых данных</returns>
-        public BookingInfoChanges GetChanges(List<BookingInfo> newAvailabilityInfo, List<BookingInfo> initialAvailabilityInfo)
+        public BookingInfoChanges GetChanges(List<BookingInfo> newBookingInfos, List<BookingInfo> initialBookingInfos)
         {
             BookingInfoChanges changes = new BookingInfoChanges();
-            List<BookingInfo> initialAvailabilityInfoCopy = initialAvailabilityInfo.GetRange(0, initialAvailabilityInfo.Count);
+            List<BookingInfo> initialBookingInfoCopy = initialBookingInfos.GetRange(0, initialBookingInfos.Count);
 
-            foreach (BookingInfo newBookingInfo in newAvailabilityInfo)
+            foreach (BookingInfo newBookingInfo in newBookingInfos)
             {
                 bool isFoundMatchingInitialBookingInfo = false;
-                for (int i = 0; i < initialAvailabilityInfoCopy.Count; i++)
+                for (int i = 0; i < initialBookingInfoCopy.Count; i++)
                 {
-                    BookingInfo initialBookingInfo = initialAvailabilityInfoCopy[i];
+                    BookingInfo initialBookingInfo = initialBookingInfoCopy[i];
                     isFoundMatchingInitialBookingInfo = (initialBookingInfo.RoomId == newBookingInfo.RoomId) &&
                                                         (initialBookingInfo.StartBooking == newBookingInfo.StartBooking) &&
                                                         (initialBookingInfo.EndBooking == newBookingInfo.EndBooking);
                     if (isFoundMatchingInitialBookingInfo)
                     {
-                        initialAvailabilityInfoCopy.Remove(initialBookingInfo);
+                        initialBookingInfoCopy.Remove(initialBookingInfo);
                         break;
                     }
                 }
@@ -48,7 +48,7 @@ namespace CalendarIntegrationCore.Services.DataProcessing
                     changes.AddedBookingInfo.Add(newBookingInfo);
                 }
             }
-            foreach (BookingInfo remainingInitialBookingInfo in initialAvailabilityInfoCopy)
+            foreach (BookingInfo remainingInitialBookingInfo in initialBookingInfoCopy)
             {
                 changes.RemovedBookingInfo.Add(remainingInitialBookingInfo);
             }
@@ -80,8 +80,8 @@ namespace CalendarIntegrationCore.Services.DataProcessing
                 {
                     result.Add(new AvailabilityStatusMessage
                     {
-                        StartDate = DateTime.Today,
-                        EndDate = autofillRangeDate,
+                        StartDate = DateTime.Today.AddDays(+1),
+                        EndDate = autofillRangeDate.AddDays(-1),
                         RoomId = roomId,
                         State = BookingLimitType.Available,
                     });                    
@@ -113,8 +113,8 @@ namespace CalendarIntegrationCore.Services.DataProcessing
                     result.Add(currAvailabilityStatusMessage);
                     result.Add(new AvailabilityStatusMessage
                     {
-                        StartDate = currAvailabilityStatusMessage.EndDate,
-                        EndDate = nextAvailabilityStatusMessage.StartDate,
+                        StartDate = currAvailabilityStatusMessage.EndDate.AddDays(+1),
+                        EndDate = nextAvailabilityStatusMessage.StartDate.AddDays(-1),
                         RoomId = roomId,
                         State = BookingLimitType.Available,
                     });
@@ -125,7 +125,7 @@ namespace CalendarIntegrationCore.Services.DataProcessing
             {
                 result.Add(new AvailabilityStatusMessage
                 {
-                    StartDate = bookingInfoForOccupiedRooms.Last().EndDate,
+                    StartDate = bookingInfoForOccupiedRooms.Last().EndDate.AddDays(+1),
                     EndDate = autofillRangeDate,
                     RoomId = roomId,
                     State = BookingLimitType.Available,
@@ -141,11 +141,8 @@ namespace CalendarIntegrationCore.Services.DataProcessing
         /// Occupied
         /// </summary>
         /// <param name="infoChanges">Объект типа BookinfInfoChanges, на основе которого создается список</param>
-        /// <param name="tlApiCode">TLApiCode комнаты, для которой передется информация о занятости</param>
         /// <returns>Список объектов типа AvailabilityStatusMessage</returns>
-        public List<AvailabilityStatusMessage> CreateAvailabilityStatusMessages(
-            BookingInfoChanges infoChanges,
-            string tlApiCode)
+        public List<AvailabilityStatusMessage> CreateAvailabilityStatusMessages(BookingInfoChanges infoChanges)
         {
             List<AvailabilityStatusMessage> result = new List<AvailabilityStatusMessage>();
             foreach (BookingInfo bookingInfo in infoChanges.RemovedBookingInfo)

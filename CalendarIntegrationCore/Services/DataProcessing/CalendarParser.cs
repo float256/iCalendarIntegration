@@ -24,10 +24,14 @@ namespace CalendarIntegrationCore.Services.DataProcessing
             ParserState state = ParserState.OutEventBlock;
             List<string> calendarFileLines = calendar.Split('\n').Select(x => x.Trim()).ToList();
             List<BookingInfo> result = new List<BookingInfo>();
-
+            bool isInCalendar = false;
             for (int lineIndex = 0; lineIndex < calendarFileLines.Count; lineIndex++)
             {
                 string currLine = calendarFileLines[lineIndex];
+                if (currLine == "BEGIN:VCALENDAR")
+                {
+                    isInCalendar = true;
+                }
                 if (currLine == "BEGIN:VEVENT")
                 {
                     if (state == ParserState.InEventBlock)
@@ -73,6 +77,11 @@ namespace CalendarIntegrationCore.Services.DataProcessing
                 {
                     endDate = ParseDate(currLine.Split(':').Last());
                 }
+            }
+
+            if (!isInCalendar)
+            {
+                throw new CalendarParserException("The string passed is not a calendar");
             }
             return result.OrderBy(elem => elem.StartBooking).ToList();
         }

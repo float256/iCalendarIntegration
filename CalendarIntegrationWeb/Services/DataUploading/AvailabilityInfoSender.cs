@@ -1,19 +1,14 @@
-﻿using CalendarIntegrationCore.Models;
-using CalendarIntegrationCore.Services;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.ServiceModel;
 using System.Threading;
 using System.Threading.Tasks;
-using CalendarIntegrationCore.Services.DataUploading;
+using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services.Repositories;
-using CalendarIntegrationWeb.Dto;
-using Microsoft.EntityFrameworkCore.Internal;
+using CalendarIntegrationWeb.Services.DataProcessing;
+using Microsoft.Extensions.Logging;
 using TLConnect;
 
-namespace CalendarIntegrationWeb.Services
+namespace CalendarIntegrationWeb.Services.DataUploading
 {
     public class AvailabilityInfoSender : IAvailabilityInfoSender
     {
@@ -47,6 +42,7 @@ namespace CalendarIntegrationWeb.Services
                     availStatuses.Select(elem => elem.RoomId).ToList());
                 List<Hotel> hotelsForRooms = _hotelRepository.GetMultiple(
                     roomsForAvailStatuses.Select(elem => elem.HotelId).ToList());
+                    
                 List<IGrouping<Room, AvailabilityStatusMessage>> availStatusesGroupedByRooms = (
                     from availStatus in availStatuses
                     join room in roomsForAvailStatuses on availStatus.RoomId equals room.Id
@@ -55,14 +51,15 @@ namespace CalendarIntegrationWeb.Services
                     from groupedAvailStatuses in availStatusesGroupedByRooms
                     join hotel in hotelsForRooms on groupedAvailStatuses.Key.HotelId equals hotel.Id
                     group groupedAvailStatuses by hotel).ToList();
-                foreach (var roomGroup in availStatusesGroupedByRoomsAndHotels)
+                
+                foreach (var hotelGroup in availStatusesGroupedByRoomsAndHotels)
                 {
-                    Hotel currHotel = roomGroup.Key;
+                    Hotel currHotel = hotelGroup.Key;
                     Dictionary<Room, List<AvailabilityStatusMessage>> availStatusesDict = new Dictionary<Room, 
                         List<AvailabilityStatusMessage>>();
-                    foreach (var currRoomGroup in roomGroup)
+                    foreach (var roomGroup in hotelGroup)
                     {
-                        availStatusesDict.Add(currRoomGroup.Key, currRoomGroup.ToList());
+                        availStatusesDict.Add(roomGroup.Key, roomGroup.ToList());
                     }
                     HotelAvailNotifRQRequest request = _soapRequestCreator.CreateRequest(
                         availStatusesDict, 

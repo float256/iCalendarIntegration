@@ -12,9 +12,11 @@ using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services.DataDownloading;
 using CalendarIntegrationCore.Services.DataProcessing;
 using CalendarIntegrationCore.Services.DataRetrieving;
-using CalendarIntegrationCore.Services.DataUploading;
+using CalendarIntegrationWeb.Services.DataUploading;
 using Microsoft.Extensions.Logging;
 using CalendarIntegrationWeb.Services;
+using CalendarIntegrationWeb.Services.BackgroundServices;
+using CalendarIntegrationWeb.Services.DataProcessing;
 using TLConnect;
 
 namespace CalendarIntegrationWeb
@@ -43,6 +45,7 @@ namespace CalendarIntegrationWeb
             services.AddScoped<IRoomRepository, RoomRepository>();
             services.AddScoped<IBookingInfoRepository, BookingInfoRepository>();
             services.AddScoped<IAvailabilityStatusMessageRepository, AvailabilityStatusMessageRepository>();
+            services.AddScoped<IRoomUploadStatusRepository, RoomUploadStatusRepository>();
             
             services.AddScoped<ICalendarParser, CalendarParser>();
             services.AddScoped<ISoapRequestCreator, SoapRequestCreator>();
@@ -58,6 +61,14 @@ namespace CalendarIntegrationWeb
             services.AddHostedService<DownloadAvailabilityInfoBackgroundService>();
             services.AddHostedService<UploadAvailabilityInfoBackgroundService>();
 
+            services.AddCors(o => o.AddPolicy("DefaultCorsPolicy", builder =>
+            {
+                builder
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .WithOrigins("http://localhost:4200");
+            }));
+            
             services.Configure<AvailabilityInfoDataProcessorOptions>(Configuration.GetSection("AvailabilityInfoDataProcessorOptions"));
             services.Configure<DownloadAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("DownloadAvailabilityInfoBackgroundServiceOptions"));
             services.Configure<UploadAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("UploadAvailabilityInfoBackgroundServiceOptions"));
@@ -76,7 +87,8 @@ namespace CalendarIntegrationWeb
             {
                 app.UseExceptionHandler("/Error");
             }
-
+            
+            app.UseCors("DefaultCorsPolicy");
             app.UseStaticFiles();
             if (!env.IsDevelopment())
             {

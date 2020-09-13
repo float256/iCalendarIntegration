@@ -1,32 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CalendarIntegrationCore.Models;
-using CalendarIntegrationCore.Services;
 using CalendarIntegrationCore.Services.DataRetrieving;
-using CalendarIntegrationCore.Services.DataUploading;
 using CalendarIntegrationCore.Services.Repositories;
+using CalendarIntegrationWeb.Services.DataUploading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace CalendarIntegrationWeb.Services
+namespace CalendarIntegrationWeb.Services.BackgroundServices
 {
     public class UploadAvailabilityInfoBackgroundService : BackgroundService, IDisposable
     {
         private readonly TimeSpan _timerPeriod;
         private readonly int _dataPackageSize;
         private readonly ILogger<UploadAvailabilityInfoBackgroundService> _logger;
-        private readonly IAvailabilityStatusMessageQueue _queue;
-        private readonly IAvailabilityInfoSender _infoSender;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IAvailabilityInfoSender _infoSender;
         
         public UploadAvailabilityInfoBackgroundService(
             ILogger<UploadAvailabilityInfoBackgroundService> logger,
             IOptions<UploadAvailabilityInfoBackgroundServiceOptions> options,
-            IAvailabilityStatusMessageQueue queue,
             IAvailabilityInfoSender infoSender,
             IServiceProvider serviceProvider)
         {
@@ -34,7 +32,6 @@ namespace CalendarIntegrationWeb.Services
             _serviceProvider = serviceProvider;
             _timerPeriod = TimeSpan.FromSeconds(options.Value.SendingPeriodInSeconds);
             _dataPackageSize = options.Value.DataPackageSize;
-            _queue = queue;
             _infoSender = infoSender;
         }
 
@@ -45,16 +42,30 @@ namespace CalendarIntegrationWeb.Services
             {
                 using (IServiceScope scope = _serviceProvider.CreateScope())
                 {
-                    List<AvailabilityStatusMessage> availMessages = _queue.PeekMultiple(_dataPackageSize);
+                    IAvailabilityStatusMessageQueue queue = scope.ServiceProvider
+                        .GetRequiredService<IAvailabilityStatusMessageQueue>();
+                    IRoomUploadStatusRepository roomUploadStatusRepository = scope.ServiceProvider
+                        .GetRequiredService<IRoomUploadStatusRepository>();
+                    
+                    List<AvailabilityStatusMessage> availMessages = queue.PeekMultiple(_dataPackageSize);
                     try
                     {
                         await _infoSender.SendAvailabilityInfo(availMessages, cancellationToken);
                         _logger.LogInformation("Availability rooms information has been uploaded to TLConnect");
-                        _queue.DequeueMultiple(_dataPackageSize);
+                        queue.DequeueMultiple(_dataPackageSize);
                     }
-                    catch (Exception e)
+                    catch (Exception exception)
                     {
-                        _logger.LogError(e, "Error occurred while trying to send data to TLConnect");
+                        foreach (var roomId in availMessages.Select(elem => elem.RoomId).Distinct())
+                        {
+                            roomUploadStatusRepository.SetStatus(new RoomUploadStatus
+                            {
+                                RoomId = roomId,
+                                Status = "Sending error",
+                                Message = exception.Message
+                            });
+                        }
+                        _logger.LogError(exception, "Error occurred while trying to send data to TLConnect");
                     }
                 }
                 await Task.Delay(_timerPeriod, cancellationToken);

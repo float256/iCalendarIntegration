@@ -8,16 +8,11 @@ namespace CalendarIntegrationCore.Services.DataRetrieving
 {
     public class AvailabilityInfoReceiver : IAvailabilityInfoReceiver
     {
-
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILogger _logger;
 
-        public AvailabilityInfoReceiver (
-            IHttpClientFactory httpClientFactory,
-            ILogger<AvailabilityInfoReceiver> logger)
+        public AvailabilityInfoReceiver (IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
-            _logger = logger;
         }
 
         /// <summary>
@@ -35,21 +30,13 @@ namespace CalendarIntegrationCore.Services.DataRetrieving
 
             HttpClient httpClient = _httpClientFactory.CreateClient();
             HttpResponseMessage response;
-            try
+            response = httpClient.GetAsync(url, cancelToken).Result;
+            if (response.StatusCode == HttpStatusCode.OK)
             {
-                response = httpClient.GetAsync(url, cancelToken).Result;
-                if (response.StatusCode == HttpStatusCode.OK)
-                {
-                    return response.Content.ReadAsStringAsync().Result;
-                }
-                else
-                {
-                    return string.Empty;
-                }
+                return response.Content.ReadAsStringAsync().Result;
             }
-            catch (Exception exception)
+            else
             {
-                _logger.LogError($"Error occurred while trying to get the calendar from the URL. Exception name: {exception.GetType().Name}; Exception message: {exception.Message}");
                 return string.Empty;
             }
         }

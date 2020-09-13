@@ -32,7 +32,6 @@ namespace CalendarIntegrationCore.Tests.Services
 
             Mock<IHttpClientFactory> mockHttpClientFactory = new Mock<IHttpClientFactory>(MockBehavior.Strict);
             Mock<HttpMessageHandler> mockHttpMessageHandler = new Mock<HttpMessageHandler>(MockBehavior.Strict);
-            Mock<ILogger<AvailabilityInfoReceiver>> mockLogger = new Mock<ILogger<AvailabilityInfoReceiver>>(MockBehavior.Strict);
 
             mockHttpMessageHandler.Protected()
                 .Setup<Task<HttpResponseMessage>>("SendAsync",
@@ -51,9 +50,7 @@ namespace CalendarIntegrationCore.Tests.Services
             mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
             // Act
-            AvailabilityInfoReceiver availabilityInfoReceiver = new AvailabilityInfoReceiver(
-                mockHttpClientFactory.Object,
-                mockLogger.Object);
+            AvailabilityInfoReceiver availabilityInfoReceiver = new AvailabilityInfoReceiver(mockHttpClientFactory.Object);
             string actualCalendar = availabilityInfoReceiver.GetCalendarByUrl(url, CancellationToken.None);
 
             // Assert
@@ -69,7 +66,6 @@ namespace CalendarIntegrationCore.Tests.Services
 
             Mock<IHttpClientFactory> mockHttpClientFactory = new Mock<IHttpClientFactory>(MockBehavior.Strict);
             Mock<HttpMessageHandler> mockHttpMessageHandler = new Mock<HttpMessageHandler>(MockBehavior.Strict);
-            Mock<ILogger<AvailabilityInfoReceiver>> mockLogger = new Mock<ILogger<AvailabilityInfoReceiver>>(MockBehavior.Strict);
 
             mockHttpMessageHandler.Protected()
                 .Setup<Task<HttpResponseMessage>>("SendAsync",
@@ -88,9 +84,7 @@ namespace CalendarIntegrationCore.Tests.Services
             mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
             // Act
-            AvailabilityInfoReceiver availabilityInfoReceiver = new AvailabilityInfoReceiver(
-                mockHttpClientFactory.Object,
-                mockLogger.Object);
+            AvailabilityInfoReceiver availabilityInfoReceiver = new AvailabilityInfoReceiver(mockHttpClientFactory.Object);
             string actualCalendar = availabilityInfoReceiver.GetCalendarByUrl(url, CancellationToken.None);
 
             // Assert

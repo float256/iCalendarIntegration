@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CalendarIntegrationCore.Models;
 
-namespace CalendarIntegrationCore.Services.DataUploading
+namespace CalendarIntegrationWeb.Services.DataUploading
 {
     public interface IAvailabilityInfoSender
     {

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
+using CalendarIntegrationCore.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using CalendarIntegrationCore.Services;
 using Microsoft.Extensions.Options;
 
-namespace CalendarIntegrationWeb.Services
+namespace CalendarIntegrationWeb.Services.BackgroundServices
 {
     public class DownloadAvailabilityInfoBackgroundService : BackgroundService, IDisposable
     {
