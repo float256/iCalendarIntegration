@@ -101,8 +101,7 @@ namespace CalendarIntegrationCore.Tests.Services
             };
 
             // Act
-            IOptions<AvailabilityInfoDataProcessorOptions> options = Options.Create(new AvailabilityInfoDataProcessorOptions());
-            AvailabilityInfoDataProcessor infoSender = new AvailabilityInfoDataProcessor(options);
+            BookingInfoDataProcessor infoSender = new BookingInfoDataProcessor();
             BookingInfoChanges actual = infoSender.GetChanges(newAvailabilityInfo, initialAvailabilityInfo);
 
             // Assert
@@ -134,10 +133,9 @@ namespace CalendarIntegrationCore.Tests.Services
             List<BookingInfo> newAvailabilityInfo = new List<BookingInfo> { };
             List<BookingInfo> initialAvailabilityInfo = new List<BookingInfo>();
             BookingInfoChanges expected = new BookingInfoChanges();
-
+            
             // Act
-            IOptions<AvailabilityInfoDataProcessorOptions> options = Options.Create(new AvailabilityInfoDataProcessorOptions());
-            AvailabilityInfoDataProcessor infoSender = new AvailabilityInfoDataProcessor(options);
+            BookingInfoDataProcessor infoSender = new BookingInfoDataProcessor();
             BookingInfoChanges actual = infoSender.GetChanges(newAvailabilityInfo, initialAvailabilityInfo);
 
             // Assert

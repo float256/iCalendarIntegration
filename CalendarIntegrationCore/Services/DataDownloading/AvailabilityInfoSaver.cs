@@ -12,19 +12,22 @@ namespace CalendarIntegrationCore.Services.DataDownloading
     {
         private readonly IBookingInfoRepository _bookingInfoRepository;
         private readonly IAvailabilityStatusMessageQueue _availabilityStatusMessageQueue;
-        private readonly IAvailabilityInfoDataProcessor _dataProcessor;
+        private readonly IAvailabilityMessageDataProcessor _messageDataProcessor;
         private readonly int _upperBoundForLoadedDatesInDays;
+        private readonly ITodayBoundary _todayBoundary;
         
         public AvailabilityInfoSaver(
             IBookingInfoRepository bookingInfoRepository, 
             IAvailabilityStatusMessageQueue availabilityStatusMessageQueue,
-            IAvailabilityInfoDataProcessor dataProcessor,
-            IOptions<AvailabilityInfoSaverOptions> options)
+            IAvailabilityMessageDataProcessor messageDataProcessor,
+            IOptions<CommonOptions> options,
+            ITodayBoundary todayBoundary)
         {
             _bookingInfoRepository = bookingInfoRepository;
             _availabilityStatusMessageQueue = availabilityStatusMessageQueue;
-            _dataProcessor = dataProcessor;
+            _messageDataProcessor = messageDataProcessor;
             _upperBoundForLoadedDatesInDays = options.Value.UpperBoundForLoadedDatesInDays;
+            _todayBoundary = todayBoundary;
         }
 
         /// <summary>
@@ -51,21 +54,19 @@ namespace CalendarIntegrationCore.Services.DataDownloading
         /// комната занята 
         /// </summary>
         /// <param name="roomId">Объект комнаты, для которой добавляются значения о доступности в БД</param>
+        /// <param name="room"></param>
         /// <param name="isFillGaps">Если значение равно true, то промежутки между датами заполняются информацией
         /// о доступности комнаты</param>
-        public void AddAllBookingInfoForRoomInQueue(Room room, bool isFillGaps = false)
+        public void AddAvailabilityMessagesForRoomInQueue(Room room, bool isFillGaps = false)
         {
             List<BookingInfo> allBookingInfoForRoom = _bookingInfoRepository.GetByRoomId(room.Id);
             List<AvailabilityStatusMessage> dateChangeStatusesForRoom = new List<AvailabilityStatusMessage>();
             List<BookingInfo> bookingInfosForDeleting = new List<BookingInfo>();
+            DateTime boundaryDate = _todayBoundary.GetBoundaryDate(_upperBoundForLoadedDatesInDays);
+            
             foreach (BookingInfo bookingInfo in allBookingInfoForRoom)
             {
-                if ((DateTime.Now.Add(TimeSpan.FromDays(_upperBoundForLoadedDatesInDays)) > bookingInfo.StartBooking) &&
-                    (_upperBoundForLoadedDatesInDays > 0))
-                {
-                    bookingInfosForDeleting.Add(bookingInfo);
-                }
-                else
+                if (_todayBoundary.IsWithinSpecifiedLimits(bookingInfo.StartBooking, boundaryDate))
                 {
                     dateChangeStatusesForRoom.Add(new AvailabilityStatusMessage
                     {
@@ -76,13 +77,10 @@ namespace CalendarIntegrationCore.Services.DataDownloading
                     });                    
                 }
             }
-            foreach (BookingInfo bookingInfo in bookingInfosForDeleting)
-            {
-                _bookingInfoRepository.Delete(bookingInfo);
-            }
+            
             if (isFillGaps)
             {
-                dateChangeStatusesForRoom = _dataProcessor.FillGapsInDates(dateChangeStatusesForRoom, room.Id);
+                dateChangeStatusesForRoom = _messageDataProcessor.FillGapsInDates(dateChangeStatusesForRoom, room.Id);
             }
             _availabilityStatusMessageQueue.EnqueueMultiple(dateChangeStatusesForRoom);
         }

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
+using CalendarIntegrationCore.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using CalendarIntegrationCore.Services;
 using Microsoft.Extensions.Options;
 
-namespace CalendarIntegrationWeb.Services
+namespace CalendarIntegrationWeb.Services.BackgroundServices
 {
     public class DownloadAvailabilityInfoBackgroundService : BackgroundService, IDisposable
     {
@@ -32,8 +32,8 @@ namespace CalendarIntegrationWeb.Services
             {
                 using (IServiceScope scope = _serviceProvider.CreateScope())
                 {
-                    IAvailabilityInfoService availabilityService = scope.ServiceProvider.GetRequiredService<IAvailabilityInfoService>();
-                    availabilityService.ProcessAllInfo(cancellationToken);
+                    IAvailabilityInfoCreator availabilityCreator = scope.ServiceProvider.GetRequiredService<IAvailabilityInfoCreator>();
+                    availabilityCreator.ProcessAllInfo(cancellationToken);
                 }
                 _logger.LogInformation("Availability rooms information has been downloaded");
                 await Task.Delay(_timerPeriod, cancellationToken);

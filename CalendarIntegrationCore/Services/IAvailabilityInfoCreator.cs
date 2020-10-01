@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CalendarIntegrationCore.Services
 {
-    public interface IAvailabilityInfoService
+    public interface IAvailabilityInfoCreator
     {
         void ProcessAllInfo(CancellationToken cancelToken);
     }

@@ -14,7 +14,7 @@ using CalendarIntegrationCore.Services.DataRetrieving;
 
 namespace CalendarIntegrationCore.Services
 {
-    public class AvailabilityInfoService: IAvailabilityInfoService
+    public class AvailabilityInfoCreator: IAvailabilityInfoCreator
     {
         private readonly IHotelRepository _hotelRepository;
         private readonly IRoomRepository _roomRepository;
@@ -22,22 +22,24 @@ namespace CalendarIntegrationCore.Services
         
         private readonly IAvailabilityInfoSaver _infoSaver;
         private readonly IAvailabilityInfoReceiver _infoReceiver;
-        private readonly IAvailabilityInfoDataProcessor _dataProcessor;
+        private readonly IBookingInfoDataProcessor _dataProcessor;
+        private readonly IAvailabilityMessageDataProcessor _messageDataProcessor;
         
         private readonly ICalendarParser _calendarParser;
         private readonly IAvailabilityStatusMessageQueue _queue;
         private readonly ILogger _logger;
 
-        public AvailabilityInfoService(
+        public AvailabilityInfoCreator(
             IHotelRepository hotelRepository,
             IRoomRepository roomRepository,
             IAvailabilityInfoSaver infoSaver,
             IAvailabilityInfoReceiver infoReceiver,
-            IAvailabilityInfoDataProcessor dataProcessor,
+            IBookingInfoDataProcessor dataProcessor,
             IBookingInfoRepository bookingInfoRepository,
             IAvailabilityStatusMessageQueue queue,
             ICalendarParser calendarParser,
-            ILogger<AvailabilityInfoService> logger)
+            ILogger<AvailabilityInfoCreator> logger,
+            IAvailabilityMessageDataProcessor messageDataProcessor)
         {
             _hotelRepository = hotelRepository;
             _roomRepository = roomRepository;
@@ -48,6 +50,7 @@ namespace CalendarIntegrationCore.Services
             _calendarParser = calendarParser;
             _logger = logger;
             _queue = queue;
+            _messageDataProcessor = messageDataProcessor;
         }
 
         /// <summary>
@@ -77,7 +80,7 @@ namespace CalendarIntegrationCore.Services
                         }
                         BookingInfoChanges changes = _dataProcessor.GetChanges(newAvailabilityInfo, initialAvailabilityInfo);
                         List<AvailabilityStatusMessage> availabilityStatusMessages =
-                            _dataProcessor.CreateAvailabilityStatusMessages(changes, currRoom.TLApiCode)
+                            _messageDataProcessor.CreateAvailabilityStatusMessages(changes)
                                 .OrderBy(elem => elem.StartDate).ToList();
                         _infoSaver.SaveChanges(changes);
 
@@ -85,7 +88,7 @@ namespace CalendarIntegrationCore.Services
                         {
                             try
                             {
-                                availabilityStatusMessages = _dataProcessor.FillGapsInDates(
+                                availabilityStatusMessages = _messageDataProcessor.FillGapsInDates(
                                     availabilityStatusMessages, currRoom.Id);
                             }
                             catch (Exception e)

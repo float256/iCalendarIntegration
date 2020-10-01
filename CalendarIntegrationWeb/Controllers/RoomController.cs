@@ -113,7 +113,7 @@ namespace CalendarIntegrationWeb.Controllers
             };
             if (previousRoomValues.TLApiCode != roomDto.TLApiCode)
             {
-                _infoSaver.AddAllBookingInfoForRoomInQueue(newRoomValues, isFillGaps: true);
+                _infoSaver.AddAvailabilityMessagesForRoomInQueue(newRoomValues, isFillGaps: true);
             }
             _roomRepository.Update(newRoomValues);
         }

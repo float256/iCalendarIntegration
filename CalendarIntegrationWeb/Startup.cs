@@ -12,9 +12,11 @@ using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services.DataDownloading;
 using CalendarIntegrationCore.Services.DataProcessing;
 using CalendarIntegrationCore.Services.DataRetrieving;
-using CalendarIntegrationCore.Services.DataUploading;
 using Microsoft.Extensions.Logging;
 using CalendarIntegrationWeb.Services;
+using CalendarIntegrationWeb.Services.BackgroundServices;
+using CalendarIntegrationWeb.Services.DataProcessing;
+using CalendarIntegrationWeb.Services.DataUploading;
 using TLConnect;
 
 namespace CalendarIntegrationWeb
@@ -51,14 +53,15 @@ namespace CalendarIntegrationWeb
             services.AddScoped<IAvailabilityInfoReceiver, AvailabilityInfoReceiver>();
             services.AddScoped<IAvailabilityInfoSaver, AvailabilityInfoSaver>();
             services.AddScoped<IAvailabilityInfoSender, AvailabilityInfoSender>();
-            services.AddScoped<IAvailabilityInfoDataProcessor, AvailabilityInfoDataProcessor>();
-            services.AddScoped<IAvailabilityInfoService, AvailabilityInfoService>();
+            services.AddScoped<IBookingInfoDataProcessor, BookingInfoDataProcessor>();
+            services.AddScoped<IAvailabilityMessageDataProcessor, AvailabilityMessageDataProcessor>();
+            services.AddScoped<IAvailabilityInfoCreator, AvailabilityInfoCreator>();
             
             services.AddScoped<ITLConnectService, TLConnectServiceClient>();
             services.AddHostedService<DownloadAvailabilityInfoBackgroundService>();
             services.AddHostedService<UploadAvailabilityInfoBackgroundService>();
 
-            services.Configure<AvailabilityInfoDataProcessorOptions>(Configuration.GetSection("AvailabilityInfoDataProcessorOptions"));
+            services.Configure<CommonOptions>(Configuration.GetSection("CommonOptions"));
             services.Configure<DownloadAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("DownloadAvailabilityInfoBackgroundServiceOptions"));
             services.Configure<UploadAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("UploadAvailabilityInfoBackgroundServiceOptions"));
             services.AddHttpClient();

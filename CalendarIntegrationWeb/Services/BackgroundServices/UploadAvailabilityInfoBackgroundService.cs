@@ -3,16 +3,14 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using CalendarIntegrationCore.Models;
-using CalendarIntegrationCore.Services;
 using CalendarIntegrationCore.Services.DataRetrieving;
-using CalendarIntegrationCore.Services.DataUploading;
-using CalendarIntegrationCore.Services.Repositories;
+using CalendarIntegrationWeb.Services.DataUploading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace CalendarIntegrationWeb.Services
+namespace CalendarIntegrationWeb.Services.BackgroundServices
 {
     public class UploadAvailabilityInfoBackgroundService : BackgroundService, IDisposable
     {

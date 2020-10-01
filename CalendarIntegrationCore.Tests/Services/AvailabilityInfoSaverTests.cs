@@ -107,7 +107,8 @@ namespace CalendarIntegrationCore.Tests.Services
 
             Mock<IBookingInfoRepository> mockBookingInfoRepository = new Mock<IBookingInfoRepository>(MockBehavior.Strict);
             Mock<IAvailabilityStatusMessageQueue> mockAvailabilityStatusMessageQueue = new Mock<IAvailabilityStatusMessageQueue>();
-            Mock<IAvailabilityInfoDataProcessor> mockAvailabilityInfoDataProcessor = new Mock<IAvailabilityInfoDataProcessor>();
+            Mock<IAvailabilityMessageDataProcessor> mockAvailabilityMessageDataProcessor = new Mock<IAvailabilityMessageDataProcessor>();
+            Mock<ITodayBoundary> mockTodayBoundary = new Mock<ITodayBoundary>();
             
             mockBookingInfoRepository.Setup(repository => repository.Add(It.IsAny<BookingInfo>()))
                 .Callback((BookingInfo bookingInfo) =>
@@ -123,12 +124,13 @@ namespace CalendarIntegrationCore.Tests.Services
                 });
 
             // Act
-            IOptions<AvailabilityInfoSaverOptions> options = Options.Create(new AvailabilityInfoSaverOptions());
+            IOptions<CommonOptions> options = Options.Create(new CommonOptions());
             AvailabilityInfoSaver infoSaver = new AvailabilityInfoSaver(
                 mockBookingInfoRepository.Object,
                 mockAvailabilityStatusMessageQueue.Object,
-                mockAvailabilityInfoDataProcessor.Object,
-                options);
+                mockAvailabilityMessageDataProcessor.Object,
+                options,
+                mockTodayBoundary.Object);
             infoSaver.SaveChanges(changes);
 
             // Assert
@@ -189,8 +191,9 @@ namespace CalendarIntegrationCore.Tests.Services
             
             Mock<IBookingInfoRepository> mockBookingInfoRepository = new Mock<IBookingInfoRepository>(MockBehavior.Strict);
             Mock<IAvailabilityStatusMessageQueue> mockAvailabilityStatusMessageQueue = new Mock<IAvailabilityStatusMessageQueue>();
-            Mock<IAvailabilityInfoDataProcessor> mockAvailabilityInfoDataProcessor = new Mock<IAvailabilityInfoDataProcessor>();
-
+            Mock<IAvailabilityMessageDataProcessor> mockAvailabilityMessageDataProcessor = new Mock<IAvailabilityMessageDataProcessor>();
+            Mock<ITodayBoundary> mockTodayBoundary = new Mock<ITodayBoundary>();
+            
             mockBookingInfoRepository.Setup(repository => repository.Add(It.IsAny<BookingInfo>()))
                 .Callback((BookingInfo bookingInfo) =>
                 {
@@ -203,14 +206,15 @@ namespace CalendarIntegrationCore.Tests.Services
                 {
                     actualBookingInfoRepositoryData.RemoveAll(elem => elem.Id == id);
                 });
-
+    
             // Act
-            IOptions<AvailabilityInfoSaverOptions> options = Options.Create(new AvailabilityInfoSaverOptions());
+            IOptions<CommonOptions> options = Options.Create(new CommonOptions());
             AvailabilityInfoSaver infoSaver = new AvailabilityInfoSaver(
                 mockBookingInfoRepository.Object,
                 mockAvailabilityStatusMessageQueue.Object,
-                mockAvailabilityInfoDataProcessor.Object,
-                options);
+                mockAvailabilityMessageDataProcessor.Object,
+                options,
+                mockTodayBoundary.Object);
             infoSaver.SaveChanges(changes);
 
             // Assert

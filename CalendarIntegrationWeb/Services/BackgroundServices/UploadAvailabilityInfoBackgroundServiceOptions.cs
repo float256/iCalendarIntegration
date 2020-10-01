@@ -1,4 +1,4 @@
-﻿namespace CalendarIntegrationWeb.Services
+﻿namespace CalendarIntegrationWeb.Services.BackgroundServices
 {
     public class UploadAvailabilityInfoBackgroundServiceOptions
     {
