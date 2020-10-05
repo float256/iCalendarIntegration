@@ -9,13 +9,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using CalendarIntegrationCore.Models;
-using CalendarIntegrationCore.Services.DataDownloading;
 using CalendarIntegrationCore.Services.DataProcessing;
 using CalendarIntegrationCore.Services.DataRetrieving;
+using CalendarIntegrationCore.Services.DataSaving;
 using Microsoft.Extensions.Logging;
 using CalendarIntegrationWeb.Services;
 using CalendarIntegrationWeb.Services.BackgroundServices;
-using CalendarIntegrationWeb.Services.DataProcessing;
 using CalendarIntegrationWeb.Services.DataUploading;
 using TLConnect;
 
@@ -49,19 +48,21 @@ namespace CalendarIntegrationWeb
             services.AddScoped<ICalendarParser, CalendarParser>();
             services.AddScoped<ISoapRequestCreator, SoapRequestCreator>();
             services.AddScoped<IAvailabilityStatusMessageQueue, AvailabilityStatusMessageQueue>();
+            services.AddScoped<ITodayBoundary, TodayBoundary>();
             
             services.AddScoped<IAvailabilityInfoReceiver, AvailabilityInfoReceiver>();
-            services.AddScoped<IAvailabilityInfoSaver, AvailabilityInfoSaver>();
+            services.AddScoped<IBookingInfoSaver, BookingInfoSaver>();
             services.AddScoped<IAvailabilityInfoSender, AvailabilityInfoSender>();
             services.AddScoped<IBookingInfoDataProcessor, BookingInfoDataProcessor>();
-            services.AddScoped<IAvailabilityMessageDataProcessor, AvailabilityMessageDataProcessor>();
-            services.AddScoped<IAvailabilityInfoCreator, AvailabilityInfoCreator>();
+            services.AddScoped<IAvailabilityMessageConverter, AvailabilityMessageConverter>();
+            services.AddScoped<IAvailabilityInfoSynchronizer, AvailabilityInfoSynchronizer>();
+            services.AddScoped<IRoomAvailabilityInitializationHandler, RoomAvailabilityInitializationHandler>();
             
             services.AddScoped<ITLConnectService, TLConnectServiceClient>();
             services.AddHostedService<DownloadAvailabilityInfoBackgroundService>();
             services.AddHostedService<UploadAvailabilityInfoBackgroundService>();
-
-            services.Configure<CommonOptions>(Configuration.GetSection("CommonOptions"));
+            
+            services.Configure<DateSynchronizationCommonOptions>(Configuration.GetSection("DateSynchronizationCommonOptions"));
             services.Configure<DownloadAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("DownloadAvailabilityInfoBackgroundServiceOptions"));
             services.Configure<UploadAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("UploadAvailabilityInfoBackgroundServiceOptions"));
             services.AddHttpClient();

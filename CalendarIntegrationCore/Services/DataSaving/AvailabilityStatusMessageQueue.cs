@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using CalendarIntegrationCore.Models;
+using CalendarIntegrationCore.Services.DataRetrieving;
 using CalendarIntegrationCore.Services.Repositories;
 
-namespace CalendarIntegrationCore.Services.DataRetrieving
+namespace CalendarIntegrationCore.Services.DataSaving
 {
     public class AvailabilityStatusMessageQueue : IAvailabilityStatusMessageQueue
     {

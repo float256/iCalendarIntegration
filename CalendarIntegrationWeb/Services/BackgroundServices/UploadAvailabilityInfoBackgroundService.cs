@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CalendarIntegrationCore.Models;
+using CalendarIntegrationCore.Services.DataProcessing;
 using CalendarIntegrationCore.Services.DataRetrieving;
+using CalendarIntegrationCore.Services.DataSaving;
 using CalendarIntegrationWeb.Services.DataUploading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -20,12 +23,14 @@ namespace CalendarIntegrationWeb.Services.BackgroundServices
         private readonly IAvailabilityStatusMessageQueue _queue;
         private readonly IAvailabilityInfoSender _infoSender;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ITodayBoundary _todayBoundary;
         
         public UploadAvailabilityInfoBackgroundService(
             ILogger<UploadAvailabilityInfoBackgroundService> logger,
             IOptions<UploadAvailabilityInfoBackgroundServiceOptions> options,
             IAvailabilityStatusMessageQueue queue,
             IAvailabilityInfoSender infoSender,
+            ITodayBoundary todayBoundary,
             IServiceProvider serviceProvider)
         {
             _logger = logger;
@@ -34,6 +39,7 @@ namespace CalendarIntegrationWeb.Services.BackgroundServices
             _dataPackageSize = options.Value.DataPackageSize;
             _queue = queue;
             _infoSender = infoSender;
+            _todayBoundary = todayBoundary;
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -43,7 +49,15 @@ namespace CalendarIntegrationWeb.Services.BackgroundServices
             {
                 using (IServiceScope scope = _serviceProvider.CreateScope())
                 {
-                    List<AvailabilityStatusMessage> availMessages = _queue.PeekMultiple(_dataPackageSize);
+                    List<AvailabilityStatusMessage> availMessages = _queue.PeekMultiple(_dataPackageSize).Select(
+                        availMessage =>
+                        {
+                            if (availMessage.StartDate < _todayBoundary.GetMinDate())
+                            {
+                                availMessage.StartDate = _todayBoundary.GetMinDate();
+                            }
+                            return availMessage;
+                        }).ToList();
                     try
                     {
                         await _infoSender.SendAvailabilityInfo(availMessages, cancellationToken);

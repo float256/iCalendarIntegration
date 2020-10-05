@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using CalendarIntegrationCore.Models;
 using TLConnect;
 
-namespace CalendarIntegrationWeb.Services.DataProcessing
+namespace CalendarIntegrationWeb.Services.DataUploading
 {
     public class SoapRequestCreator: ISoapRequestCreator
     {

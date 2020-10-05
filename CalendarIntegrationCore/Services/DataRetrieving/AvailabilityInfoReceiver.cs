@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 namespace CalendarIntegrationCore.Services.DataRetrieving
@@ -26,7 +27,7 @@ namespace CalendarIntegrationCore.Services.DataRetrieving
         /// <param name="url">URL адрес календаря</param>
         /// <param name="cancelToken">Токен отмены задачи</param>
         /// <returns>Строка, содержащая календарь</returns>
-        public string GetCalendarByUrl(string url, CancellationToken cancelToken)
+        public async Task<string> GetCalendarByUrl(string url, CancellationToken cancelToken)
         {
             if (cancelToken.IsCancellationRequested)
             {
@@ -34,13 +35,12 @@ namespace CalendarIntegrationCore.Services.DataRetrieving
             }
 
             HttpClient httpClient = _httpClientFactory.CreateClient();
-            HttpResponseMessage response;
             try
             {
-                response = httpClient.GetAsync(url, cancelToken).Result;
+                var response = await httpClient.GetAsync(url, cancelToken);
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    return response.Content.ReadAsStringAsync().Result;
+                    return await response.Content.ReadAsStringAsync();
                 }
                 else
                 {

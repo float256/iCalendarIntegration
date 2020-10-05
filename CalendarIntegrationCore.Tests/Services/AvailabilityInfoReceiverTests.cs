@@ -54,7 +54,7 @@ namespace CalendarIntegrationCore.Tests.Services
             AvailabilityInfoReceiver availabilityInfoReceiver = new AvailabilityInfoReceiver(
                 mockHttpClientFactory.Object,
                 mockLogger.Object);
-            string actualCalendar = availabilityInfoReceiver.GetCalendarByUrl(url, CancellationToken.None);
+            string actualCalendar = availabilityInfoReceiver.GetCalendarByUrl(url, CancellationToken.None).Result;
 
             // Assert
             Assert.Equal(expectedCalendar, actualCalendar);
@@ -91,7 +91,7 @@ namespace CalendarIntegrationCore.Tests.Services
             AvailabilityInfoReceiver availabilityInfoReceiver = new AvailabilityInfoReceiver(
                 mockHttpClientFactory.Object,
                 mockLogger.Object);
-            string actualCalendar = availabilityInfoReceiver.GetCalendarByUrl(url, CancellationToken.None);
+            string actualCalendar = availabilityInfoReceiver.GetCalendarByUrl(url, CancellationToken.None).Result;
 
             // Assert
             Assert.Equal(expectedCalendar, actualCalendar);

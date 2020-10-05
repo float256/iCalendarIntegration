@@ -8,38 +8,38 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using CalendarIntegrationCore.Services.DataDownloading;
 using CalendarIntegrationCore.Services.DataProcessing;
 using CalendarIntegrationCore.Services.DataRetrieving;
+using CalendarIntegrationCore.Services.DataSaving;
 
 namespace CalendarIntegrationCore.Services
 {
-    public class AvailabilityInfoCreator: IAvailabilityInfoCreator
+    public class AvailabilityInfoSynchronizer: IAvailabilityInfoSynchronizer
     {
         private readonly IHotelRepository _hotelRepository;
         private readonly IRoomRepository _roomRepository;
         private readonly IBookingInfoRepository _bookingInfoRepository;
         
-        private readonly IAvailabilityInfoSaver _infoSaver;
+        private readonly IBookingInfoSaver _infoSaver;
         private readonly IAvailabilityInfoReceiver _infoReceiver;
         private readonly IBookingInfoDataProcessor _dataProcessor;
-        private readonly IAvailabilityMessageDataProcessor _messageDataProcessor;
+        private readonly IAvailabilityMessageConverter _messageConverter;
         
         private readonly ICalendarParser _calendarParser;
         private readonly IAvailabilityStatusMessageQueue _queue;
         private readonly ILogger _logger;
 
-        public AvailabilityInfoCreator(
+        public AvailabilityInfoSynchronizer(
             IHotelRepository hotelRepository,
             IRoomRepository roomRepository,
-            IAvailabilityInfoSaver infoSaver,
+            IBookingInfoSaver infoSaver,
             IAvailabilityInfoReceiver infoReceiver,
             IBookingInfoDataProcessor dataProcessor,
             IBookingInfoRepository bookingInfoRepository,
             IAvailabilityStatusMessageQueue queue,
             ICalendarParser calendarParser,
-            ILogger<AvailabilityInfoCreator> logger,
-            IAvailabilityMessageDataProcessor messageDataProcessor)
+            ILogger<AvailabilityInfoSynchronizer> logger,
+            IAvailabilityMessageConverter messageConverter)
         {
             _hotelRepository = hotelRepository;
             _roomRepository = roomRepository;
@@ -50,7 +50,7 @@ namespace CalendarIntegrationCore.Services
             _calendarParser = calendarParser;
             _logger = logger;
             _queue = queue;
-            _messageDataProcessor = messageDataProcessor;
+            _messageConverter = messageConverter;
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace CalendarIntegrationCore.Services
         /// в виде строки с календарем, парсит календарь, после чего сохраняет изменения в БД.
         /// </summary>
         /// <param name="cancelToken">Токен отмены задачи</param>
-        public void ProcessAllInfo(CancellationToken cancelToken)
+        public async Task ProcessAllInfo(CancellationToken cancelToken)
         {
             if (!cancelToken.IsCancellationRequested)
             {
@@ -66,7 +66,7 @@ namespace CalendarIntegrationCore.Services
                 {
                     foreach (Room currRoom in _roomRepository.GetByHotelId(currHotel.Id))
                     {
-                        string calendar = _infoReceiver.GetCalendarByUrl(currRoom.Url, cancelToken);
+                        string calendar = await _infoReceiver.GetCalendarByUrl(currRoom.Url, cancelToken);
                         List<BookingInfo> newAvailabilityInfo;
                         List<BookingInfo> initialAvailabilityInfo = _bookingInfoRepository.GetByRoomId(currRoom.Id);
                         try
@@ -80,22 +80,9 @@ namespace CalendarIntegrationCore.Services
                         }
                         BookingInfoChanges changes = _dataProcessor.GetChanges(newAvailabilityInfo, initialAvailabilityInfo);
                         List<AvailabilityStatusMessage> availabilityStatusMessages =
-                            _messageDataProcessor.CreateAvailabilityStatusMessages(changes)
+                            _messageConverter.CreateAvailabilityStatusMessages(changes)
                                 .OrderBy(elem => elem.StartDate).ToList();
                         _infoSaver.SaveChanges(changes);
-
-                        if (initialAvailabilityInfo.Count == 0)
-                        {
-                            try
-                            {
-                                availabilityStatusMessages = _messageDataProcessor.FillGapsInDates(
-                                    availabilityStatusMessages, currRoom.Id);
-                            }
-                            catch (Exception e)
-                            {
-                                _logger.LogError(e, "Error occurred while trying to fill gaps in dates");
-                            }
-                        }
                         _queue.EnqueueMultiple(availabilityStatusMessages);
                     }
                 }

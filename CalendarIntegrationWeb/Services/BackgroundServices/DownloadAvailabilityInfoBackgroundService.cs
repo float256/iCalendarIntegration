@@ -32,8 +32,8 @@ namespace CalendarIntegrationWeb.Services.BackgroundServices
             {
                 using (IServiceScope scope = _serviceProvider.CreateScope())
                 {
-                    IAvailabilityInfoCreator availabilityCreator = scope.ServiceProvider.GetRequiredService<IAvailabilityInfoCreator>();
-                    availabilityCreator.ProcessAllInfo(cancellationToken);
+                    IAvailabilityInfoSynchronizer availabilitySynchronizer = scope.ServiceProvider.GetRequiredService<IAvailabilityInfoSynchronizer>();
+                    await availabilitySynchronizer.ProcessAllInfo(cancellationToken);
                 }
                 _logger.LogInformation("Availability rooms information has been downloaded");
                 await Task.Delay(_timerPeriod, cancellationToken);
