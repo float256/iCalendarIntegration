@@ -40,5 +40,30 @@ namespace CalendarIntegrationCore.Services.DataProcessing
             }
             return result;
         }
+
+        /// <summary>
+        /// Данный метод создает объект AvailabilityStatusMessage на основе переданных данных
+        /// </summary>
+        /// <param name="bookingInfo">Объект типа BookingInfo, из которого берутся поля StartDate, EndDate, RoomId</param>
+        /// <param name="state">Информация о занятости комнаты</param>
+        /// <param name="addDaysForStartDate">Количество дней, которое добавляется к BookingInfo.StartBooking
+        /// при конвертировании поля в StartDate. Также допустимы отрицательные значения</param>
+        /// <param name="addDaysForEndDate">Количество дней, которое добавляется к BookingInfo.EndBooking
+        /// при конвертировании поля в EndDate. Также допустимы отрицательные значения</param>
+        /// <returns>Объект типа AvailabilityStatusMessage, созданный на основе переданных аргументов</returns>
+        public AvailabilityStatusMessage CreateAvailabilityStatusMessage(
+            BookingInfo bookingInfo,
+            BookingLimitType state,
+            int addDaysForStartDate = 0,
+            int addDaysForEndDate = 0)
+        {
+            return new AvailabilityStatusMessage
+            {
+                StartDate = bookingInfo.StartBooking.AddDays(addDaysForStartDate),
+                EndDate = bookingInfo.EndBooking.AddDays(addDaysForEndDate),
+                RoomId = bookingInfo.RoomId,
+                State = state,
+            };
+        }
     }
 }

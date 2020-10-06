@@ -1,31 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services.DataProcessing;
+using CalendarIntegrationCore.Services.DataSaving;
 using CalendarIntegrationCore.Services.Repositories;
-using Microsoft.Extensions.Options;
 
-namespace CalendarIntegrationCore.Services.DataSaving
+namespace CalendarIntegrationCore.Services.InitializationHandlers
 {
     public class RoomAvailabilityInitializationHandler: IRoomAvailabilityInitializationHandler
     {
         private readonly IBookingInfoRepository _bookingInfoRepository;
         private readonly ITodayBoundary _todayBoundary;
         private readonly IAvailabilityStatusMessageQueue _availabilityStatusMessageQueue;
-        private readonly int _synchronizationDaysInFuture;
-
+        private readonly IAvailabilityMessageConverter _availabilityMessageConverter;
         
         public RoomAvailabilityInitializationHandler(
             IBookingInfoRepository bookingInfoRepository,
             ITodayBoundary todayBoundary,
             IAvailabilityStatusMessageQueue availabilityStatusMessageQueue,
-            IOptions<DateSynchronizationCommonOptions> options)
+            IAvailabilityMessageConverter availabilityMessageConverter)
         {
             _bookingInfoRepository = bookingInfoRepository;
             _todayBoundary = todayBoundary;
             _availabilityStatusMessageQueue = availabilityStatusMessageQueue;
-            _synchronizationDaysInFuture = options.Value.SynchronizationDaysInFuture;
+            _availabilityMessageConverter = availabilityMessageConverter;
         }
         
         /// <summary>
@@ -35,7 +33,7 @@ namespace CalendarIntegrationCore.Services.DataSaving
         /// </summary>
         /// <param name="roomId">Объект комнаты, для которой добавляются значения о доступности в БД</param>
         /// <param name="room"></param>
-        public void AddAvailabilityMessagesForRoomInQueue(Room room)
+        public void AddAvailabilityMessagesForRoomToQueue(Room room)
         {
             List<BookingInfo> allBookingInfoForRoom = _bookingInfoRepository.GetByRoomId(room.Id);
             List<AvailabilityStatusMessage> dateChangeStatusesForRoom = new List<AvailabilityStatusMessage>();
@@ -44,13 +42,10 @@ namespace CalendarIntegrationCore.Services.DataSaving
             {
                 if (bookingInfo.StartBooking <  _todayBoundary.GetMaxDate())
                 {
-                    dateChangeStatusesForRoom.Add(new AvailabilityStatusMessage
-                    {
-                        RoomId = room.Id,
-                        StartDate = bookingInfo.StartBooking,
-                        EndDate = bookingInfo.EndBooking,
-                        State = BookingLimitType.Occupied
-                    });                    
+                    dateChangeStatusesForRoom.Add(_availabilityMessageConverter.CreateAvailabilityStatusMessage(
+                        bookingInfo,
+                        BookingLimitType.Occupied,
+                        addDaysForEndDate: -1));
                 }
             }
             dateChangeStatusesForRoom = FillDateGapsAsAvailable(dateChangeStatusesForRoom, room.Id);
@@ -88,8 +83,8 @@ namespace CalendarIntegrationCore.Services.DataSaving
             {
                 result.Add(new AvailabilityStatusMessage
                 {
-                    StartDate = _todayBoundary.GetMinDate().AddDays(1),
-                    EndDate = availabilityMessagesForOccupiedRooms[0].StartDate.AddDays(-1),
+                    StartDate = _todayBoundary.GetMinDate(),
+                    EndDate = availabilityMessagesForOccupiedRooms[0].StartDate,
                     RoomId = roomId,
                     State = BookingLimitType.Available
                 });

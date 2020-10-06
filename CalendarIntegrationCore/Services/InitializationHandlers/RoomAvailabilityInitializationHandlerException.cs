@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CalendarIntegrationCore.Services.DataSaving
+namespace CalendarIntegrationCore.Services.InitializationHandlers
 {
     public class RoomAvailabilityInitializationHandlerException: Exception
     {
