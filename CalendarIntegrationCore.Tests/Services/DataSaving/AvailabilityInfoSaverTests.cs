@@ -1,14 +1,12 @@
-﻿using CalendarIntegrationCore.Models;
-using CalendarIntegrationCore.Services;
+﻿using System;
+using System.Collections.Generic;
+using CalendarIntegrationCore.Models;
+using CalendarIntegrationCore.Services.DataSaving;
 using CalendarIntegrationCore.Services.Repositories;
 using Moq;
-using System;
-using System.Collections.Generic;
-using CalendarIntegrationCore.Services.DataSaving;
-using Microsoft.Extensions.Options;
 using Xunit;
 
-namespace CalendarIntegrationCore.Tests.Services
+namespace CalendarIntegrationCore.Tests.Services.DataSaving
 {
     public class AvailabilityInfoSaverTests
     {

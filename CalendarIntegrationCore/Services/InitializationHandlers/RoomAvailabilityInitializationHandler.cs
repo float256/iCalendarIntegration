@@ -84,7 +84,7 @@ namespace CalendarIntegrationCore.Services.InitializationHandlers
                 result.Add(new AvailabilityStatusMessage
                 {
                     StartDate = _todayBoundary.GetMinDate(),
-                    EndDate = availabilityMessagesForOccupiedRooms[0].StartDate,
+                    EndDate = availabilityMessagesForOccupiedRooms[0].StartDate.AddDays(-1),
                     RoomId = roomId,
                     State = BookingLimitType.Available
                 });

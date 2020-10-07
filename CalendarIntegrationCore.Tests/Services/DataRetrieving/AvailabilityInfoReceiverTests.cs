@@ -1,20 +1,15 @@
-﻿using CalendarIntegrationCore.Models;
-using CalendarIntegrationCore.Services;
-using CalendarIntegrationCore.Services.Repositories;
-using Microsoft.Extensions.Logging;
-using Moq;
-using Moq.Protected;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CalendarIntegrationCore.Services.DataRetrieving;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Moq.Protected;
 using Xunit;
 
-namespace CalendarIntegrationCore.Tests.Services
+namespace CalendarIntegrationCore.Tests.Services.DataRetrieving
 {
     public class AvailabilityInfoReceiverTests
     {
