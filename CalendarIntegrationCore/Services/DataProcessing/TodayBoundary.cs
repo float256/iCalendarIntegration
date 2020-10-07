@@ -15,17 +15,17 @@ namespace CalendarIntegrationCore.Services.DataProcessing
         
         public bool IsFutureDate(DateTime date)
         {
-            return date > DateTime.Today;
+            return date > GetMinDate();
         }
 
         public DateTime GetMaxDate()
         {
-            return DateTime.Today.Add(TimeSpan.FromDays(_synchronizationDaysInFuture));
+            return DateTime.UtcNow.Date.Add(TimeSpan.FromDays(_synchronizationDaysInFuture));
         }
 
         public DateTime GetMinDate()
         {
-            return DateTime.Today;
+            return DateTime.UtcNow.Date.AddDays(-1);
         }
     }
 }

@@ -42,10 +42,8 @@ namespace CalendarIntegrationCore.Services.InitializationHandlers
             {
                 if (bookingInfo.StartBooking <  _todayBoundary.GetMaxDate())
                 {
-                    dateChangeStatusesForRoom.Add(_availabilityMessageConverter.CreateAvailabilityStatusMessage(
-                        bookingInfo,
-                        BookingLimitType.Occupied,
-                        addDaysForEndDate: -1));
+                    dateChangeStatusesForRoom.Add(
+                        _availabilityMessageConverter.CreateAvailabilityStatusMessageForBookingInfo(bookingInfo));
                 }
             }
             dateChangeStatusesForRoom = FillDateGapsAsAvailable(dateChangeStatusesForRoom, room.Id);

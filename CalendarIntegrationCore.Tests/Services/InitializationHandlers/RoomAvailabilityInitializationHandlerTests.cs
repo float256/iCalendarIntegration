@@ -51,8 +51,8 @@ namespace CalendarIntegrationCore.Tests.Services.InitializationHandlers
                 {
                     RoomId = room.Id,
                     State = BookingLimitType.Available,
-                    StartDate = DateTime.Today,
-                    EndDate = DateTime.Today.AddDays(synchronizationDaysInFuture)
+                    StartDate = DateTime.UtcNow.Date.AddDays(-1),
+                    EndDate = DateTime.UtcNow.Date.AddDays(synchronizationDaysInFuture)
                 }
             };
             List<AvailabilityStatusMessage> actualAvailabilityStatusMessageQueue = new List<AvailabilityStatusMessage>();
@@ -123,15 +123,15 @@ namespace CalendarIntegrationCore.Tests.Services.InitializationHandlers
                 new BookingInfo
                 {
                     Id = 0,
-                    StartBooking = DateTime.Today.AddDays(3),
-                    EndBooking = DateTime.Today.AddDays(12),
+                    StartBooking = DateTime.UtcNow.Date.AddDays(3),
+                    EndBooking = DateTime.UtcNow.Date.AddDays(12),
                     RoomId = 1
                 },
                 new BookingInfo
                 {
                     Id = 0,
-                    StartBooking = DateTime.Today.AddDays(15),
-                    EndBooking = DateTime.Today.AddDays(18),
+                    StartBooking = DateTime.UtcNow.Date.AddDays(15),
+                    EndBooking = DateTime.UtcNow.Date.AddDays(18),
                     RoomId = 1
                 }
             };
@@ -141,36 +141,36 @@ namespace CalendarIntegrationCore.Tests.Services.InitializationHandlers
                 {
                     RoomId = room.Id,
                     State = BookingLimitType.Available,
-                    StartDate = DateTime.Today,
-                    EndDate = DateTime.Today.AddDays(2)
+                    StartDate = DateTime.UtcNow.Date.AddDays(-1),
+                    EndDate = DateTime.UtcNow.Date.AddDays(2)
                 },
                 new AvailabilityStatusMessage
                 {
                     RoomId = room.Id,
                     State = BookingLimitType.Occupied,
-                    StartDate = DateTime.Today.AddDays(3),
-                    EndDate = DateTime.Today.AddDays(11)
+                    StartDate = DateTime.UtcNow.Date.AddDays(3),
+                    EndDate = DateTime.UtcNow.Date.AddDays(11)
                 },
                 new AvailabilityStatusMessage
                 {
                     RoomId = room.Id,
                     State = BookingLimitType.Available,
-                    StartDate = DateTime.Today.AddDays(12),
-                    EndDate = DateTime.Today.AddDays(14)
+                    StartDate = DateTime.UtcNow.Date.AddDays(12),
+                    EndDate = DateTime.UtcNow.Date.AddDays(14)
                 },
                 new AvailabilityStatusMessage
                 {
                     RoomId = room.Id,
                     State = BookingLimitType.Occupied,
-                    StartDate = DateTime.Today.AddDays(15),
-                    EndDate = DateTime.Today.AddDays(17)
+                    StartDate = DateTime.UtcNow.Date.AddDays(15),
+                    EndDate = DateTime.UtcNow.Date.AddDays(17)
                 },
                 new AvailabilityStatusMessage
                 {
                     RoomId = room.Id,
                     State = BookingLimitType.Available,
-                    StartDate = DateTime.Today.AddDays(18),
-                    EndDate = DateTime.Today.AddDays(synchronizationDaysInFuture)
+                    StartDate = DateTime.UtcNow.Date.AddDays(18),
+                    EndDate = DateTime.UtcNow.Date.AddDays(synchronizationDaysInFuture)
                 }
             };
             List<AvailabilityStatusMessage> actualAvailabilityStatusMessageQueue = new List<AvailabilityStatusMessage>();
@@ -184,10 +184,10 @@ namespace CalendarIntegrationCore.Tests.Services.InitializationHandlers
             ITodayBoundary todayBoundary = new TodayBoundary(dateSyncOptions);
             IAvailabilityMessageConverter availabilityMessageConverter = new AvailabilityMessageConverter();;
 
-            Mock<IBookingInfoRepository> mockBookingInfoRepository = new Mock<IBookingInfoRepository>(MockBehavior.Strict);;
+            Mock<IBookingInfoRepository> mockBookingInfoRepository = new Mock<IBookingInfoRepository>(MockBehavior.Strict);
             Mock<IAvailabilityStatusMessageQueue> mockAvailabilityStatusMessageQueue = new Mock<IAvailabilityStatusMessageQueue>(MockBehavior.Strict);;
             
-            mockBookingInfoRepository.Setup(repository => repository.GetByRoomId(It.IsAny<int>()))
+            mockBookingInfoRepository.Setup(repository => repository.GetByRoomId(room.Id))
                 .Returns((int roomId) =>
                 {
                     return bookingInfoRepositoryData.Where(bookingInfo => bookingInfo.RoomId == roomId)
@@ -221,6 +221,86 @@ namespace CalendarIntegrationCore.Tests.Services.InitializationHandlers
                 Assert.Equal(expectedMessage.EndDate, actualMessage.EndDate);
                 Assert.Equal(expectedMessage.RoomId, expectedMessage.RoomId);
             }   
+        }
+
+        [Fact]
+        public void RoomAvailabilityInitializationHandler_AddAvailabilityMessagesForRoomToQueue_RoomWithIntersectedBookingInfos_Exception()
+        {
+            // Arrange
+            int synchronizationDaysInFuture = 200;
+            string expectedExceptionMessage = "Intersection of dates is not allowed";
+            Room room = new Room
+            {
+                Id = 1,
+                HotelId = 1234,
+                Name = "room",
+                TLApiCode = "1234",
+                Url = "https://example.com"
+            };
+            List<BookingInfo> bookingInfoRepositoryData = new List<BookingInfo>
+            {
+                new BookingInfo
+                {
+                    Id = 0,
+                    StartBooking = DateTime.UtcNow.Date.AddDays(3),
+                    EndBooking = DateTime.UtcNow.Date.AddDays(12),
+                    RoomId = 1
+                },
+                new BookingInfo
+                {
+                    Id = 0,
+                    StartBooking = DateTime.UtcNow.Date.AddDays(15),
+                    EndBooking = DateTime.UtcNow.Date.AddDays(18),
+                    RoomId = 1
+                },
+                new BookingInfo
+                {
+                    Id = 0,
+                    StartBooking = DateTime.UtcNow.Date.AddDays(17),
+                    EndBooking = DateTime.UtcNow.Date.AddDays(21),
+                    RoomId = 1
+                }
+            };
+            List<AvailabilityStatusMessage> actualAvailabilityStatusMessageQueue = new List<AvailabilityStatusMessage>();
+
+            IOptions<DateSynchronizationCommonOptions> dateSyncOptions =
+                Options.Create(new DateSynchronizationCommonOptions
+                {
+                    SynchronizationDaysInFuture = synchronizationDaysInFuture
+                });
+            
+            ITodayBoundary todayBoundary = new TodayBoundary(dateSyncOptions);
+            IAvailabilityMessageConverter availabilityMessageConverter = new AvailabilityMessageConverter();;
+
+            Mock<IBookingInfoRepository> mockBookingInfoRepository = new Mock<IBookingInfoRepository>(MockBehavior.Strict);
+            Mock<IAvailabilityStatusMessageQueue> mockAvailabilityStatusMessageQueue = new Mock<IAvailabilityStatusMessageQueue>(MockBehavior.Strict);;
+            
+            mockBookingInfoRepository.Setup(repository => repository.GetByRoomId(room.Id))
+                .Returns((int roomId) =>
+                {
+                    return bookingInfoRepositoryData.Where(bookingInfo => bookingInfo.RoomId == roomId)
+                        .OrderBy(bookingInfo => bookingInfo.StartBooking)
+                        .ToList();                
+                });
+            mockAvailabilityStatusMessageQueue.Setup(repository =>
+                repository.EnqueueMultiple(It.IsAny<List<AvailabilityStatusMessage>>()))
+                    .Callback((List<AvailabilityStatusMessage> availStatusMessage) =>
+                    {
+                        actualAvailabilityStatusMessageQueue.AddRange(availStatusMessage);
+                    });
+
+            // Act
+            RoomAvailabilityInitializationHandler roomAvailInitHandler = new RoomAvailabilityInitializationHandler(
+                mockBookingInfoRepository.Object,
+                todayBoundary,
+                mockAvailabilityStatusMessageQueue.Object,
+                availabilityMessageConverter);
+            Action act = () => roomAvailInitHandler.AddAvailabilityMessagesForRoomToQueue(room);
+            RoomAvailabilityInitializationHandlerException exception = 
+                Assert.Throws<RoomAvailabilityInitializationHandlerException>(act);
+            
+            // Assert
+            Assert.Equal(expectedExceptionMessage, exception.Message);
         }
     }
 }

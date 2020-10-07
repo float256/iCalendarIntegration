@@ -42,27 +42,19 @@ namespace CalendarIntegrationCore.Services.DataProcessing
         }
 
         /// <summary>
-        /// Данный метод создает объект AvailabilityStatusMessage на основе переданных данных
+        /// Данный метод создает объект AvailabilityStatusMessage на основе переданных данных. Поле State полученного
+        /// объекта равен BookingLimitType.Occupied
         /// </summary>
         /// <param name="bookingInfo">Объект типа BookingInfo, из которого берутся поля StartDate, EndDate, RoomId</param>
-        /// <param name="state">Информация о занятости комнаты</param>
-        /// <param name="addDaysForStartDate">Количество дней, которое добавляется к BookingInfo.StartBooking
-        /// при конвертировании поля в StartDate. Также допустимы отрицательные значения</param>
-        /// <param name="addDaysForEndDate">Количество дней, которое добавляется к BookingInfo.EndBooking
-        /// при конвертировании поля в EndDate. Также допустимы отрицательные значения</param>
         /// <returns>Объект типа AvailabilityStatusMessage, созданный на основе переданных аргументов</returns>
-        public AvailabilityStatusMessage CreateAvailabilityStatusMessage(
-            BookingInfo bookingInfo,
-            BookingLimitType state,
-            int addDaysForStartDate = 0,
-            int addDaysForEndDate = 0)
+        public AvailabilityStatusMessage CreateAvailabilityStatusMessageForBookingInfo(BookingInfo bookingInfo)
         {
             return new AvailabilityStatusMessage
             {
-                StartDate = bookingInfo.StartBooking.AddDays(addDaysForStartDate),
-                EndDate = bookingInfo.EndBooking.AddDays(addDaysForEndDate),
+                StartDate = bookingInfo.StartBooking,
+                EndDate = bookingInfo.EndBooking.AddDays(-1),
                 RoomId = bookingInfo.RoomId,
-                State = state,
+                State = BookingLimitType.Occupied,
             };
         }
     }
