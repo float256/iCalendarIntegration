@@ -296,10 +296,9 @@ namespace CalendarIntegrationCore.Tests.Services.InitializationHandlers
                 mockAvailabilityStatusMessageQueue.Object,
                 availabilityMessageConverter);
             Action act = () => roomAvailInitHandler.AddAvailabilityMessagesForRoomToQueue(room);
-            RoomAvailabilityInitializationHandlerException exception = 
-                Assert.Throws<RoomAvailabilityInitializationHandlerException>(act);
             
-            // Assert
+            //Assert
+            RoomAvailabilityInitializationHandlerException  exception = Assert.Throws<RoomAvailabilityInitializationHandlerException>(act);
             Assert.Equal(expectedExceptionMessage, exception.Message);
         }
     }

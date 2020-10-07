@@ -92,7 +92,7 @@ namespace CalendarIntegrationCore.Services.InitializationHandlers
                 AvailabilityStatusMessage currAvailabilityStatusMessage = availabilityMessagesForOccupiedRooms[i];
                 AvailabilityStatusMessage nextAvailabilityStatusMessage = availabilityMessagesForOccupiedRooms[i + 1];
 
-                if (currAvailabilityStatusMessage.EndDate > nextAvailabilityStatusMessage.StartDate)
+                if (currAvailabilityStatusMessage.EndDate >= nextAvailabilityStatusMessage.StartDate)
                 {
                     throw new RoomAvailabilityInitializationHandlerException("Intersection of dates is not allowed");
                 }
