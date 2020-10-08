@@ -9,8 +9,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using CalendarIntegrationCore.Models;
+using CalendarIntegrationCore.Services.DataProcessing;
+using CalendarIntegrationCore.Services.DataRetrieving;
+using CalendarIntegrationCore.Services.DataSaving;
+using CalendarIntegrationCore.Services.InitializationHandlers;
 using Microsoft.Extensions.Logging;
 using CalendarIntegrationWeb.Services;
+using CalendarIntegrationWeb.Services.BackgroundServices;
+using CalendarIntegrationWeb.Services.DataUploading;
 using TLConnect;
 
 namespace CalendarIntegrationWeb
@@ -34,19 +40,32 @@ namespace CalendarIntegrationWeb
                 configuration.RootPath = "ClientApp/dist";
             });
             services.AddDbContext<ApplicationContext>(options => options.UseSqlServer(Configuration["ConnectionStrings:default"]));
+            
             services.AddScoped<IHotelRepository, HotelRepository>();
             services.AddScoped<IRoomRepository, RoomRepository>();
             services.AddScoped<IBookingInfoRepository, BookingInfoRepository>();
+            services.AddScoped<IAvailabilityStatusMessageRepository, AvailabilityStatusMessageRepository>();
+            
             services.AddScoped<ICalendarParser, CalendarParser>();
             services.AddScoped<ISoapRequestCreator, SoapRequestCreator>();
+            services.AddScoped<IAvailabilityStatusMessageQueue, AvailabilityStatusMessageQueue>();
+            services.AddScoped<ITodayBoundary, TodayBoundary>();
+            
             services.AddScoped<IAvailabilityInfoReceiver, AvailabilityInfoReceiver>();
-            services.AddScoped<IAvailabilityInfoSaver, AvailabilityInfoSaver>();
+            services.AddScoped<IBookingInfoSaver, BookingInfoSaver>();
             services.AddScoped<IAvailabilityInfoSender, AvailabilityInfoSender>();
-            services.AddScoped<IAvailabilityInfoDataProcessor, AvailabilityInfoDataProcessor>();
-            services.AddScoped<IAvailabilityInfoService, AvailabilityInfoService>();
+            services.AddScoped<IBookingInfoDataProcessor, BookingInfoDataProcessor>();
+            services.AddScoped<IAvailabilityMessageConverter, AvailabilityMessageConverter>();
+            services.AddScoped<IAvailabilityInfoSynchronizer, AvailabilityInfoSynchronizer>();
+            services.AddScoped<IRoomAvailabilityInitializationHandler, RoomAvailabilityInitializationHandler>();
+            
             services.AddScoped<ITLConnectService, TLConnectServiceClient>();
-            services.Configure<SendAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("SendAvailabilityInfoHostedServiceOptions"));
-            services.AddHostedService<SendAvailabilityInfoBackgroundService>();
+            services.AddHostedService<DownloadAvailabilityInfoBackgroundService>();
+            services.AddHostedService<UploadAvailabilityInfoBackgroundService>();
+            
+            services.Configure<DateSynchronizationCommonOptions>(Configuration.GetSection("DateSynchronizationCommonOptions"));
+            services.Configure<DownloadAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("DownloadAvailabilityInfoBackgroundServiceOptions"));
+            services.Configure<UploadAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("UploadAvailabilityInfoBackgroundServiceOptions"));
             services.AddHttpClient();
         }
 

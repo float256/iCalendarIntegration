@@ -4,9 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services;
+using CalendarIntegrationCore.Services.DataSaving;
+using CalendarIntegrationCore.Services.InitializationHandlers;
 using CalendarIntegrationCore.Services.Repositories;
 using CalendarIntegrationWeb.Dto;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CalendarIntegrationWeb.Controllers
@@ -15,13 +16,18 @@ namespace CalendarIntegrationWeb.Controllers
     [ApiController]
     public class RoomController : ControllerBase
     {
-        private IRoomRepository _roomRepository;
-        private IHotelRepository _hotelRepository;
+        private readonly IRoomRepository _roomRepository;
+        private readonly IHotelRepository _hotelRepository;
+        private readonly IRoomAvailabilityInitializationHandler _roomAvailabilityInitializationHandler;
 
-        public RoomController(IRoomRepository roomRepository, IHotelRepository hotelRepository)
+        public RoomController(
+            IRoomRepository roomRepository,
+            IHotelRepository hotelRepository,
+            IRoomAvailabilityInitializationHandler roomAvailabilityInitializationHandler)
         {
             _roomRepository = roomRepository;
             _hotelRepository = hotelRepository;
+            _roomAvailabilityInitializationHandler = roomAvailabilityInitializationHandler;
         }
 
         [HttpGet("{id:int}")]
@@ -87,6 +93,7 @@ namespace CalendarIntegrationWeb.Controllers
                     Url = roomDto.Url
                 };
                 _roomRepository.Add(room);
+                _roomAvailabilityInitializationHandler.AddAvailabilityMessagesForRoomToQueue(room);
                 return Ok(room);
             }
             else
@@ -98,14 +105,21 @@ namespace CalendarIntegrationWeb.Controllers
         [HttpPost("Update")]
         public void Update(RoomDto roomDto)
         {
-            _roomRepository.Update(new Room
+            Room previousRoom = _roomRepository.Get(roomDto.Id);
+            _roomRepository.Detach(previousRoom);
+            Room newRoom = new Room
             {
                 Id = roomDto.Id,
                 HotelId = roomDto.HotelId,
                 Name = roomDto.Name,
                 TLApiCode = roomDto.TLApiCode,
                 Url = roomDto.Url
-            });
+            };
+            if (previousRoom.TLApiCode != roomDto.TLApiCode)
+            {
+                _roomAvailabilityInitializationHandler.AddAvailabilityMessagesForRoomToQueue(newRoom);
+            }
+            _roomRepository.Update(newRoom);
         }
 
         [HttpPost("Delete")]

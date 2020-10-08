@@ -11,8 +11,8 @@ namespace CalendarIntegrationCore.Services.Repositories
 {
     public class RoomRepository: IRoomRepository
     {
-        private ApplicationContext _context;
-
+        private readonly ApplicationContext _context;
+        
         public RoomRepository(ApplicationContext context)
         {
             _context = context;
@@ -20,14 +20,19 @@ namespace CalendarIntegrationCore.Services.Repositories
 
         public Room Get(int id)
         {
-            return _context.RoomSet.Where(x => x.Id == id).SingleOrDefault();
+            return _context.RoomSet.SingleOrDefault(x => x.Id == id);
         }
 
+        public List<Room> GetMultiple(List<int> roomIndexes)
+        {
+            return _context.RoomSet.Where(room => roomIndexes.Contains(room.Id)).ToList();
+        }
+        
         public List<Room> GetByHotelId(int hotelId)
         {
             return _context.RoomSet.Where(room => room.HotelId == hotelId).ToList();
         }
-
+        
         public List<Room> GetAll()
         {
             return _context.RoomSet.ToList();
@@ -51,6 +56,11 @@ namespace CalendarIntegrationCore.Services.Repositories
             _context.RoomSet.Update(room);
             _context.Entry(room).State = EntityState.Modified;
             _context.SaveChanges();
+        }
+
+        public void Detach(Room room)
+        {
+            _context.Entry(room).State = EntityState.Detached;
         }
     }
 }

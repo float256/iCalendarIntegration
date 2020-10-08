@@ -10,7 +10,7 @@ namespace CalendarIntegrationCore.Services.Repositories
 {
     public class BookingInfoRepository: IBookingInfoRepository
     {
-        private ApplicationContext _context;
+        private readonly ApplicationContext _context;
 
         public BookingInfoRepository(ApplicationContext context)
         {
@@ -19,7 +19,7 @@ namespace CalendarIntegrationCore.Services.Repositories
 
         public BookingInfo Get(int id)
         {
-            BookingInfo bookingInfo = _context.BookingInfoSet.Where(x => x.Id == id).SingleOrDefault();
+            BookingInfo bookingInfo = _context.BookingInfoSet.SingleOrDefault(x => x.Id == id);
             return bookingInfo;
         }
 
