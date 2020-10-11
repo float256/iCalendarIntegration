@@ -2,7 +2,7 @@
 using CalendarIntegrationCore.Models;
 using TLConnect;
 
-namespace CalendarIntegrationWeb.Services.DataProcessing
+namespace CalendarIntegrationWeb.Services.DataUploading
 {
     public interface ISoapRequestCreator
     {

@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services.Repositories;
-using CalendarIntegrationWeb.Services.DataProcessing;
 using Microsoft.Extensions.Logging;
 using TLConnect;
 

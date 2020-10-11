@@ -1,21 +1,15 @@
-﻿using CalendarIntegrationCore.Models;
-using CalendarIntegrationCore.Services;
-using CalendarIntegrationCore.Services.Repositories;
-using Moq;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Text;
+using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services.DataProcessing;
-using Microsoft.Extensions.Options;
 using Xunit;
 
-namespace CalendarIntegrationCore.Tests.Services
+namespace CalendarIntegrationCore.Tests.Services.DataProcessing
 {
-    public class AvailabilityInfoDataProcessorTests
+    public class BookingInfoDataProcessorTests
     {
         [Fact]
-        public void AvailabilityInfoSender_GetChanges_CalendarWithPartOfPreviousAndNewDates_CorrectBookingInfoChanges()
+        public void BookingInfoDataProcessor_GetChanges_CalendarWithPartOfPreviousAndNewDates_CorrectBookingInfoChanges()
         {
             // Arrange
             int roomId = 1;
@@ -101,9 +95,8 @@ namespace CalendarIntegrationCore.Tests.Services
             };
 
             // Act
-            IOptions<AvailabilityInfoDataProcessorOptions> options = Options.Create(new AvailabilityInfoDataProcessorOptions());
-            AvailabilityInfoDataProcessor infoSender = new AvailabilityInfoDataProcessor(options);
-            BookingInfoChanges actual = infoSender.GetChanges(newAvailabilityInfo, initialAvailabilityInfo);
+            BookingInfoDataProcessor dataProcessor = new BookingInfoDataProcessor();
+            BookingInfoChanges actual = dataProcessor.GetChanges(newAvailabilityInfo, initialAvailabilityInfo);
 
             // Assert
             Assert.Equal(expected.AddedBookingInfo.Count, actual.AddedBookingInfo.Count);
@@ -128,16 +121,15 @@ namespace CalendarIntegrationCore.Tests.Services
         }
 
         [Fact]
-        public void AvailabilityInfoSender_GetChanges_CalendarWithoutDatesAndWithoutPreviousDates_EmptyBookingInfoChangesObject()
+        public void BookingInfoDataProcessor_GetChanges_CalendarWithoutDatesAndWithoutPreviousDates_EmptyBookingInfoChangesObject()
         {
             // Arrange
             List<BookingInfo> newAvailabilityInfo = new List<BookingInfo> { };
             List<BookingInfo> initialAvailabilityInfo = new List<BookingInfo>();
             BookingInfoChanges expected = new BookingInfoChanges();
-
+            
             // Act
-            IOptions<AvailabilityInfoDataProcessorOptions> options = Options.Create(new AvailabilityInfoDataProcessorOptions());
-            AvailabilityInfoDataProcessor infoSender = new AvailabilityInfoDataProcessor(options);
+            BookingInfoDataProcessor infoSender = new BookingInfoDataProcessor();
             BookingInfoChanges actual = infoSender.GetChanges(newAvailabilityInfo, initialAvailabilityInfo);
 
             // Assert

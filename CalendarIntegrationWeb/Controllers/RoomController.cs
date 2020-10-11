@@ -4,12 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services;
-using CalendarIntegrationCore.Services.DataDownloading;
-using CalendarIntegrationCore.Services.DataProcessing;
-using CalendarIntegrationCore.Services.DataRetrieving;
+using CalendarIntegrationCore.Services.DataSaving;
+using CalendarIntegrationCore.Services.InitializationHandlers;
 using CalendarIntegrationCore.Services.Repositories;
 using CalendarIntegrationWeb.Dto;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CalendarIntegrationWeb.Controllers
@@ -20,16 +18,16 @@ namespace CalendarIntegrationWeb.Controllers
     {
         private readonly IRoomRepository _roomRepository;
         private readonly IHotelRepository _hotelRepository;
-        private readonly IAvailabilityInfoSaver _infoSaver;
+        private readonly IRoomAvailabilityInitializationHandler _roomAvailabilityInitializationHandler;
 
         public RoomController(
             IRoomRepository roomRepository,
             IHotelRepository hotelRepository,
-            IAvailabilityInfoSaver infoSaver)
+            IRoomAvailabilityInitializationHandler roomAvailabilityInitializationHandler)
         {
             _roomRepository = roomRepository;
             _hotelRepository = hotelRepository;
-            _infoSaver = infoSaver;
+            _roomAvailabilityInitializationHandler = roomAvailabilityInitializationHandler;
         }
 
         [HttpGet("{id:int}")]
@@ -95,6 +93,7 @@ namespace CalendarIntegrationWeb.Controllers
                     Url = roomDto.Url
                 };
                 _roomRepository.Add(room);
+                _roomAvailabilityInitializationHandler.AddAvailabilityMessagesForRoomToQueue(room);
                 return Ok(room);
             }
             else
@@ -106,9 +105,9 @@ namespace CalendarIntegrationWeb.Controllers
         [HttpPost("Update")]
         public void Update(RoomDto roomDto)
         {
-            Room previousRoomValues = _roomRepository.Get(roomDto.Id);
-            _roomRepository.Detach(previousRoomValues);
-            Room newRoomValues = new Room
+            Room previousRoom = _roomRepository.Get(roomDto.Id);
+            _roomRepository.Detach(previousRoom);
+            Room newRoom = new Room
             {
                 Id = roomDto.Id,
                 HotelId = roomDto.HotelId,
@@ -116,11 +115,11 @@ namespace CalendarIntegrationWeb.Controllers
                 TLApiCode = roomDto.TLApiCode,
                 Url = roomDto.Url
             };
-            if (previousRoomValues.TLApiCode != roomDto.TLApiCode)
+            if (previousRoom.TLApiCode != roomDto.TLApiCode)
             {
-                _infoSaver.CreateAvailabilityStatusMessagesForRoom(newRoomValues, isFillGaps: true);
+                _roomAvailabilityInitializationHandler.AddAvailabilityMessagesForRoomToQueue(newRoom);
             }
-            _roomRepository.Update(newRoomValues);
+            _roomRepository.Update(newRoom);
         }
 
         [HttpPost("Delete")]

@@ -1,20 +1,15 @@
-﻿using CalendarIntegrationCore.Models;
-using CalendarIntegrationCore.Services;
-using CalendarIntegrationCore.Services.Repositories;
-using Microsoft.Extensions.Logging;
-using Moq;
-using Moq.Protected;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CalendarIntegrationCore.Services.DataRetrieving;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Moq.Protected;
 using Xunit;
 
-namespace CalendarIntegrationCore.Tests.Services
+namespace CalendarIntegrationCore.Tests.Services.DataRetrieving
 {
     public class AvailabilityInfoReceiverTests
     {
@@ -32,6 +27,7 @@ namespace CalendarIntegrationCore.Tests.Services
 
             Mock<IHttpClientFactory> mockHttpClientFactory = new Mock<IHttpClientFactory>(MockBehavior.Strict);
             Mock<HttpMessageHandler> mockHttpMessageHandler = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+            Mock<ILogger<AvailabilityInfoReceiver>> mockLogger = new Mock<ILogger<AvailabilityInfoReceiver>>(MockBehavior.Strict);
 
             mockHttpMessageHandler.Protected()
                 .Setup<Task<HttpResponseMessage>>("SendAsync",
@@ -50,8 +46,10 @@ namespace CalendarIntegrationCore.Tests.Services
             mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
             // Act
-            AvailabilityInfoReceiver availabilityInfoReceiver = new AvailabilityInfoReceiver(mockHttpClientFactory.Object);
-            string actualCalendar = availabilityInfoReceiver.GetCalendarByUrl(url, CancellationToken.None);
+            AvailabilityInfoReceiver availabilityInfoReceiver = new AvailabilityInfoReceiver(
+                mockHttpClientFactory.Object,
+                mockLogger.Object);
+            string actualCalendar = availabilityInfoReceiver.GetCalendarByUrl(url, CancellationToken.None).Result;
 
             // Assert
             Assert.Equal(expectedCalendar, actualCalendar);
@@ -66,6 +64,7 @@ namespace CalendarIntegrationCore.Tests.Services
 
             Mock<IHttpClientFactory> mockHttpClientFactory = new Mock<IHttpClientFactory>(MockBehavior.Strict);
             Mock<HttpMessageHandler> mockHttpMessageHandler = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+            Mock<ILogger<AvailabilityInfoReceiver>> mockLogger = new Mock<ILogger<AvailabilityInfoReceiver>>(MockBehavior.Strict);
 
             mockHttpMessageHandler.Protected()
                 .Setup<Task<HttpResponseMessage>>("SendAsync",
@@ -84,8 +83,10 @@ namespace CalendarIntegrationCore.Tests.Services
             mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
             // Act
-            AvailabilityInfoReceiver availabilityInfoReceiver = new AvailabilityInfoReceiver(mockHttpClientFactory.Object);
-            string actualCalendar = availabilityInfoReceiver.GetCalendarByUrl(url, CancellationToken.None);
+            AvailabilityInfoReceiver availabilityInfoReceiver = new AvailabilityInfoReceiver(
+                mockHttpClientFactory.Object,
+                mockLogger.Object);
+            string actualCalendar = availabilityInfoReceiver.GetCalendarByUrl(url, CancellationToken.None).Result;
 
             // Assert
             Assert.Equal(expectedCalendar, actualCalendar);

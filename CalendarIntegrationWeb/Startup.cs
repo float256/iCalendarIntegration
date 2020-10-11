@@ -9,14 +9,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using CalendarIntegrationCore.Models;
-using CalendarIntegrationCore.Services.DataDownloading;
 using CalendarIntegrationCore.Services.DataProcessing;
 using CalendarIntegrationCore.Services.DataRetrieving;
-using CalendarIntegrationWeb.Services.DataUploading;
+using CalendarIntegrationCore.Services.DataSaving;
+using CalendarIntegrationCore.Services.InitializationHandlers;
 using Microsoft.Extensions.Logging;
 using CalendarIntegrationWeb.Services;
 using CalendarIntegrationWeb.Services.BackgroundServices;
-using CalendarIntegrationWeb.Services.DataProcessing;
+using CalendarIntegrationWeb.Services.DataUploading;
 using TLConnect;
 
 namespace CalendarIntegrationWeb
@@ -45,31 +45,25 @@ namespace CalendarIntegrationWeb
             services.AddScoped<IRoomRepository, RoomRepository>();
             services.AddScoped<IBookingInfoRepository, BookingInfoRepository>();
             services.AddScoped<IAvailabilityStatusMessageRepository, AvailabilityStatusMessageRepository>();
-            services.AddScoped<IRoomUploadStatusRepository, RoomUploadStatusRepository>();
             
             services.AddScoped<ICalendarParser, CalendarParser>();
             services.AddScoped<ISoapRequestCreator, SoapRequestCreator>();
             services.AddScoped<IAvailabilityStatusMessageQueue, AvailabilityStatusMessageQueue>();
+            services.AddScoped<ITodayBoundary, TodayBoundary>();
             
             services.AddScoped<IAvailabilityInfoReceiver, AvailabilityInfoReceiver>();
-            services.AddScoped<IAvailabilityInfoSaver, AvailabilityInfoSaver>();
+            services.AddScoped<IBookingInfoSaver, BookingInfoSaver>();
             services.AddScoped<IAvailabilityInfoSender, AvailabilityInfoSender>();
-            services.AddScoped<IAvailabilityInfoDataProcessor, AvailabilityInfoDataProcessor>();
-            services.AddScoped<IAvailabilityInfoService, AvailabilityInfoService>();
+            services.AddScoped<IBookingInfoDataProcessor, BookingInfoDataProcessor>();
+            services.AddScoped<IAvailabilityMessageConverter, AvailabilityMessageConverter>();
+            services.AddScoped<IAvailabilityInfoSynchronizer, AvailabilityInfoSynchronizer>();
+            services.AddScoped<IRoomAvailabilityInitializationHandler, RoomAvailabilityInitializationHandler>();
             
             services.AddScoped<ITLConnectService, TLConnectServiceClient>();
             services.AddHostedService<DownloadAvailabilityInfoBackgroundService>();
             services.AddHostedService<UploadAvailabilityInfoBackgroundService>();
-
-            services.AddCors(o => o.AddPolicy("DefaultCorsPolicy", builder =>
-            {
-                builder
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .WithOrigins("http://localhost:4200");
-            }));
             
-            services.Configure<AvailabilityInfoDataProcessorOptions>(Configuration.GetSection("AvailabilityInfoDataProcessorOptions"));
+            services.Configure<DateSynchronizationCommonOptions>(Configuration.GetSection("DateSynchronizationCommonOptions"));
             services.Configure<DownloadAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("DownloadAvailabilityInfoBackgroundServiceOptions"));
             services.Configure<UploadAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("UploadAvailabilityInfoBackgroundServiceOptions"));
             services.AddHttpClient();
@@ -87,8 +81,7 @@ namespace CalendarIntegrationWeb
             {
                 app.UseExceptionHandler("/Error");
             }
-            
-            app.UseCors("DefaultCorsPolicy");
+
             app.UseStaticFiles();
             if (!env.IsDevelopment())
             {

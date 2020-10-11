@@ -4,7 +4,7 @@ using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services.DataProcessing;
 using Xunit;
 
-namespace CalendarIntegrationCore.Tests.Services
+namespace CalendarIntegrationCore.Tests.Services.DataProcessing
 {
     public class CalendarParserTests
     {
