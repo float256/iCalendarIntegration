@@ -9,6 +9,7 @@ using CalendarIntegrationCore.Services.InitializationHandlers;
 using CalendarIntegrationCore.Services.Repositories;
 using CalendarIntegrationWeb.Dto;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace CalendarIntegrationWeb.Controllers
 {
@@ -19,15 +20,21 @@ namespace CalendarIntegrationWeb.Controllers
         private readonly IRoomRepository _roomRepository;
         private readonly IHotelRepository _hotelRepository;
         private readonly IRoomAvailabilityInitializationHandler _roomAvailabilityInitializationHandler;
-
+        private readonly IRoomUploadStatusRepository _roomUploadStatusRepository;
+        private readonly ILogger _logger;
+        
         public RoomController(
             IRoomRepository roomRepository,
             IHotelRepository hotelRepository,
-            IRoomAvailabilityInitializationHandler roomAvailabilityInitializationHandler)
+            IRoomAvailabilityInitializationHandler roomAvailabilityInitializationHandler,
+            IRoomUploadStatusRepository roomUploadStatusRepository,
+            ILogger<RoomController> logger)
         {
             _roomRepository = roomRepository;
             _hotelRepository = hotelRepository;
             _roomAvailabilityInitializationHandler = roomAvailabilityInitializationHandler;
+            _roomUploadStatusRepository = roomUploadStatusRepository;
+            _logger = logger;
         }
 
         [HttpGet("{id:int}")]
@@ -93,7 +100,20 @@ namespace CalendarIntegrationWeb.Controllers
                     Url = roomDto.Url
                 };
                 _roomRepository.Add(room);
-                _roomAvailabilityInitializationHandler.AddAvailabilityMessagesForRoomToQueue(room);
+                try
+                {
+                    _roomAvailabilityInitializationHandler.AddAvailabilityMessagesForRoomToQueue(room);
+                }
+                catch (RoomAvailabilityInitializationHandlerException exception)
+                {
+                    _roomUploadStatusRepository.SetStatus(new RoomUploadStatus
+                    {
+                        RoomId = room.Id,
+                        Status = "Add Availability Message Error",
+                        Message = exception.Message
+                    });
+                    _logger.LogError(exception, "Error occurred while trying to adding availability messages");                    
+                }
                 return Ok(room);
             }
             else
@@ -115,11 +135,24 @@ namespace CalendarIntegrationWeb.Controllers
                 TLApiCode = roomDto.TLApiCode,
                 Url = roomDto.Url
             };
-            if (previousRoom.TLApiCode != roomDto.TLApiCode)
+            try
             {
-                _roomAvailabilityInitializationHandler.AddAvailabilityMessagesForRoomToQueue(newRoom);
+                if (previousRoom.TLApiCode != roomDto.TLApiCode)
+                {
+                    _roomAvailabilityInitializationHandler.AddAvailabilityMessagesForRoomToQueue(newRoom);
+                }
+                _roomRepository.Update(newRoom);
             }
-            _roomRepository.Update(newRoom);
+            catch (RoomAvailabilityInitializationHandlerException exception)
+            {
+                _roomUploadStatusRepository.SetStatus(new RoomUploadStatus
+                {
+                    RoomId = newRoom.Id,
+                    Status = "Add Availability Message Error",
+                    Message = exception.Message
+                });
+                _logger.LogError(exception, "Error occurred while trying to adding availability messages");
+            }
         }
 
         [HttpPost("Delete")]

@@ -57,11 +57,20 @@ namespace CalendarIntegrationWeb
             services.AddScoped<IBookingInfoDataProcessor, BookingInfoDataProcessor>();
             services.AddScoped<IAvailabilityMessageConverter, AvailabilityMessageConverter>();
             services.AddScoped<IAvailabilityInfoSynchronizer, AvailabilityInfoSynchronizer>();
+            services.AddScoped<IRoomUploadStatusRepository, RoomUploadStatusRepository>(); 
             services.AddScoped<IRoomAvailabilityInitializationHandler, RoomAvailabilityInitializationHandler>();
             
             services.AddScoped<ITLConnectService, TLConnectServiceClient>();
             services.AddHostedService<DownloadAvailabilityInfoBackgroundService>();
             services.AddHostedService<UploadAvailabilityInfoBackgroundService>();
+            
+            services.AddCors(o => o.AddPolicy("DefaultCorsPolicy", builder =>
+            {
+                builder
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .WithOrigins("http://localhost:4200");
+            }));
             
             services.Configure<DateSynchronizationCommonOptions>(Configuration.GetSection("DateSynchronizationCommonOptions"));
             services.Configure<DownloadAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("DownloadAvailabilityInfoBackgroundServiceOptions"));
@@ -81,7 +90,8 @@ namespace CalendarIntegrationWeb
             {
                 app.UseExceptionHandler("/Error");
             }
-
+            
+            app.UseCors("DefaultCorsPolicy");
             app.UseStaticFiles();
             if (!env.IsDevelopment())
             {

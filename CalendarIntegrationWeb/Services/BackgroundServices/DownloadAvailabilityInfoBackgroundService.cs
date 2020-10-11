@@ -22,7 +22,7 @@ namespace CalendarIntegrationWeb.Services.BackgroundServices
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
-            _timerPeriod = TimeSpan.FromSeconds(options.Value.SavingPeriodInSeconds);
+            _timerPeriod = TimeSpan.FromSeconds(options.Value.DownloadPeriodInSeconds);
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)

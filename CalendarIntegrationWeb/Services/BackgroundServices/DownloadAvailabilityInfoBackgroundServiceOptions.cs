@@ -2,6 +2,6 @@
 {
     public class DownloadAvailabilityInfoBackgroundServiceOptions
     {
-        public int SavingPeriodInSeconds { get; set; }
+        public int DownloadPeriodInSeconds { get; set; }
     }
 }

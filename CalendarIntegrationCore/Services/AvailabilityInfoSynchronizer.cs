@@ -19,6 +19,7 @@ namespace CalendarIntegrationCore.Services
         private readonly IHotelRepository _hotelRepository;
         private readonly IRoomRepository _roomRepository;
         private readonly IBookingInfoRepository _bookingInfoRepository;
+        private readonly IRoomUploadStatusRepository _roomUploadStatusRepository;
         
         private readonly IBookingInfoSaver _infoSaver;
         private readonly IAvailabilityInfoReceiver _infoReceiver;
@@ -38,6 +39,7 @@ namespace CalendarIntegrationCore.Services
             IBookingInfoRepository bookingInfoRepository,
             IAvailabilityStatusMessageQueue queue,
             ICalendarParser calendarParser,
+            IRoomUploadStatusRepository roomUploadStatusRepository,
             ILogger<AvailabilityInfoSynchronizer> logger,
             IAvailabilityMessageConverter messageConverter)
         {
@@ -50,6 +52,7 @@ namespace CalendarIntegrationCore.Services
             _calendarParser = calendarParser;
             _logger = logger;
             _queue = queue;
+            _roomUploadStatusRepository = roomUploadStatusRepository;
             _messageConverter = messageConverter;
         }
 
@@ -66,7 +69,28 @@ namespace CalendarIntegrationCore.Services
                 {
                     foreach (Room currRoom in _roomRepository.GetByHotelId(currHotel.Id))
                     {
-                        string calendar = await _infoReceiver.GetCalendarByUrl(currRoom.Url, cancelToken);
+                        string calendar;
+                        try
+                        {
+                            calendar = await _infoReceiver.GetCalendarByUrl(currRoom.Url, cancelToken);
+                            _roomUploadStatusRepository.SetStatus(new RoomUploadStatus
+                            {
+                                RoomId = currRoom.Id,
+                                Status = "OK",
+                                Message = "Successful uploading"
+                            });
+                        }
+                        catch (Exception exception)
+                        {
+                            _roomUploadStatusRepository.SetStatus(new RoomUploadStatus
+                            {
+                                RoomId = currRoom.Id,
+                                Status = "Calendar Downloading Error",
+                                Message = exception.Message
+                            });
+                            _logger.LogError(exception, "Error occurred while trying to get the calendar from the URL");
+                            continue;
+                        }
                         List<BookingInfo> newAvailabilityInfo;
                         List<BookingInfo> initialAvailabilityInfo = _bookingInfoRepository.GetByRoomId(currRoom.Id);
                         try
@@ -75,6 +99,12 @@ namespace CalendarIntegrationCore.Services
                         }
                         catch (Exception exception)
                         {
+                            _roomUploadStatusRepository.SetStatus(new RoomUploadStatus
+                            {
+                                RoomId = currRoom.Id,
+                                Status = "Calendar Parsing Error",
+                                Message = exception.Message
+                            });
                             _logger.LogError(exception, "Error occurred while trying to parse the calendar");
                             continue;
                         }
