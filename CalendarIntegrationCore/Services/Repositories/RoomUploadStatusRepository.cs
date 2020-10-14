@@ -16,12 +16,33 @@ namespace CalendarIntegrationCore.Services.Repositories
         
         public RoomUploadStatus Get(int id)
         {
-            return _context.RoomUploadStatusSet.SingleOrDefault(x => x.Id == id);
+            RoomUploadStatus roomUploadStatus = _context.RoomUploadStatusSet.SingleOrDefault(x => x.Id == id);
+            if (roomUploadStatus == null)
+            {
+                roomUploadStatus = new RoomUploadStatus
+                {
+                    Id = id,
+                    Status = "",
+                    Message = ""
+                };
+            }
+            return roomUploadStatus;
         }
 
         public RoomUploadStatus GetByRoomId(int roomId)
         {
-            return _context.RoomUploadStatusSet.SingleOrDefault(elem => elem.RoomId == roomId);
+            RoomUploadStatus roomUploadStatus = _context.RoomUploadStatusSet
+                .SingleOrDefault(elem => elem.RoomId == roomId);
+            if (roomUploadStatus == null)
+            {
+                roomUploadStatus = new RoomUploadStatus
+                {
+                    RoomId = roomId,
+                    Status = "",
+                    Message = ""
+                };
+            }
+            return roomUploadStatus;
         }
 
         public void SetStatus(RoomUploadStatus newStatus)

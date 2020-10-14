@@ -7,6 +7,7 @@ using CalendarIntegrationCore.Services;
 using CalendarIntegrationCore.Services.DataSaving;
 using CalendarIntegrationCore.Services.InitializationHandlers;
 using CalendarIntegrationCore.Services.Repositories;
+using CalendarIntegrationCore.Services.StatusSaving;
 using CalendarIntegrationWeb.Dto;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -20,6 +21,7 @@ namespace CalendarIntegrationWeb.Controllers
         private readonly IRoomRepository _roomRepository;
         private readonly IHotelRepository _hotelRepository;
         private readonly IRoomAvailabilityInitializationHandler _roomAvailabilityInitializationHandler;
+        private readonly IRoomUploadingStatusSaver _roomUploadingStatusSaver;
         private readonly IRoomUploadStatusRepository _roomUploadStatusRepository;
         private readonly ILogger _logger;
         
@@ -27,12 +29,14 @@ namespace CalendarIntegrationWeb.Controllers
             IRoomRepository roomRepository,
             IHotelRepository hotelRepository,
             IRoomAvailabilityInitializationHandler roomAvailabilityInitializationHandler,
+            IRoomUploadingStatusSaver roomUploadingStatusSaver,
             IRoomUploadStatusRepository roomUploadStatusRepository,
             ILogger<RoomController> logger)
         {
             _roomRepository = roomRepository;
             _hotelRepository = hotelRepository;
             _roomAvailabilityInitializationHandler = roomAvailabilityInitializationHandler;
+            _roomUploadingStatusSaver = roomUploadingStatusSaver;
             _roomUploadStatusRepository = roomUploadStatusRepository;
             _logger = logger;
         }
@@ -43,13 +47,16 @@ namespace CalendarIntegrationWeb.Controllers
             Room room = _roomRepository.Get(id);
             if (room != default)
             {
+                RoomUploadStatus roomStatus = _roomUploadStatusRepository.GetByRoomId(room.Id);
                 return Ok(new RoomDto
                 {
                     Id = room.Id,
                     HotelId = room.HotelId,
                     Name = room.Name,
                     TLApiCode = room.TLApiCode,
-                    Url = room.Url
+                    Url = room.Url,
+                    Status = roomStatus.Status,
+                    StatusMessage = roomStatus.Message
                 });
             }
             else
@@ -62,13 +69,19 @@ namespace CalendarIntegrationWeb.Controllers
         public ActionResult<List<Room>> GetByHotelId(int hotelId)
         {
             List<RoomDto> result = _roomRepository.GetByHotelId(hotelId).Select(
-                room => new RoomDto
+                room =>
                 {
-                    Id = room.Id,
-                    HotelId = room.HotelId,
-                    Name = room.Name,
-                    TLApiCode = room.TLApiCode,
-                    Url = room.Url
+                    RoomUploadStatus currRoomStatus = _roomUploadStatusRepository.GetByRoomId(room.Id);
+                    return new RoomDto
+                    {
+                        Id = room.Id,
+                        HotelId = room.HotelId,
+                        Name = room.Name,
+                        TLApiCode = room.TLApiCode,
+                        Url = room.Url,
+                        Status = currRoomStatus.Status,
+                        StatusMessage = currRoomStatus.Message
+                    };
                 }).ToList();
             return Ok(result);
         }
@@ -77,13 +90,19 @@ namespace CalendarIntegrationWeb.Controllers
         public ActionResult<List<RoomDto>> GetAll()
         {
             return _roomRepository.GetAll().Select(
-                room => new RoomDto
+                room =>
                 {
-                    Id = room.Id,
-                    HotelId = room.HotelId,
-                    Name = room.Name,
-                    TLApiCode = room.TLApiCode,
-                    Url = room.Url
+                    RoomUploadStatus currRoomStatus = _roomUploadStatusRepository.GetByRoomId(room.Id);
+                    return new RoomDto
+                    {
+                        Id = room.Id,
+                        HotelId = room.HotelId,
+                        Name = room.Name,
+                        TLApiCode = room.TLApiCode,
+                        Url = room.Url,
+                        Status = currRoomStatus.Status,
+                        StatusMessage = currRoomStatus.Message
+                    };
                 }).ToList();
         }
 
@@ -106,13 +125,8 @@ namespace CalendarIntegrationWeb.Controllers
                 }
                 catch (RoomAvailabilityInitializationHandlerException exception)
                 {
-                    _roomUploadStatusRepository.SetStatus(new RoomUploadStatus
-                    {
-                        RoomId = room.Id,
-                        Status = "Add Availability Message Error",
-                        Message = exception.Message
-                    });
-                    _logger.LogError(exception, "Error occurred while trying to adding availability messages");                    
+                    _roomUploadingStatusSaver.SetRoomStatus(room.Id, "Add Availability Message Error", exception.Message);
+                    _logger.LogError(exception, "Error occurred while trying to initialize room availability");                    
                 }
                 return Ok(room);
             }
@@ -145,12 +159,7 @@ namespace CalendarIntegrationWeb.Controllers
             }
             catch (RoomAvailabilityInitializationHandlerException exception)
             {
-                _roomUploadStatusRepository.SetStatus(new RoomUploadStatus
-                {
-                    RoomId = newRoom.Id,
-                    Status = "Add Availability Message Error",
-                    Message = exception.Message
-                });
+                _roomUploadingStatusSaver.SetRoomStatus(newRoom.Id, "Add Availability Message Error", exception.Message);
                 _logger.LogError(exception, "Error occurred while trying to adding availability messages");
             }
         }

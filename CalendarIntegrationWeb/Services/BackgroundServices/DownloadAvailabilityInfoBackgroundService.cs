@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace CalendarIntegrationWeb.Services.BackgroundServices
 {
-    public class DownloadAvailabilityInfoBackgroundService : BackgroundService, IDisposable
+    public class DownloadAvailabilityInfoBackgroundService : BackgroundService
     {
         private readonly TimeSpan _timerPeriod;
         private readonly ILogger<DownloadAvailabilityInfoBackgroundService> _logger;
@@ -33,11 +33,19 @@ namespace CalendarIntegrationWeb.Services.BackgroundServices
                 using (IServiceScope scope = _serviceProvider.CreateScope())
                 {
                     IAvailabilityInfoSynchronizer availabilitySynchronizer = scope.ServiceProvider.GetRequiredService<IAvailabilityInfoSynchronizer>();
-                    await availabilitySynchronizer.ProcessAllInfo(cancellationToken);
+                    try
+                    {
+                        await availabilitySynchronizer.ProcessAllInfo(cancellationToken);
+                    }
+                    catch ( Exception exception )
+                    {
+                        _logger.LogError(exception, $"Unexpected exception at DownloadAvailabilityBackgroundService" );
+                    }
                 }
                 _logger.LogInformation("Availability rooms information has been downloaded");
                 await Task.Delay(_timerPeriod, cancellationToken);
             }
+            _logger.LogInformation("UploadAvailabilityInfoBackgroundService background is stopped");
         }
     }
 }

@@ -8,6 +8,7 @@ using CalendarIntegrationCore.Services.DataProcessing;
 using CalendarIntegrationCore.Services.DataRetrieving;
 using CalendarIntegrationCore.Services.DataSaving;
 using CalendarIntegrationCore.Services.Repositories;
+using CalendarIntegrationCore.Services.StatusSaving;
 using CalendarIntegrationWeb.Services.DataUploading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -16,7 +17,7 @@ using Microsoft.Extensions.Options;
 
 namespace CalendarIntegrationWeb.Services.BackgroundServices
 {
-    public class UploadAvailabilityInfoBackgroundService : BackgroundService, IDisposable
+    public class UploadAvailabilityInfoBackgroundService : BackgroundService
     {
         private readonly TimeSpan _timerPeriod;
         private readonly int _dataPackageSize;
@@ -44,8 +45,8 @@ namespace CalendarIntegrationWeb.Services.BackgroundServices
                 {
                     IAvailabilityStatusMessageQueue queue = scope.ServiceProvider
                         .GetRequiredService<IAvailabilityStatusMessageQueue>();
-                    IRoomUploadStatusRepository roomUploadStatusRepository = scope.ServiceProvider
-                        .GetRequiredService<IRoomUploadStatusRepository>();
+                    IRoomUploadingStatusSaver roomUploadingStatusSaver = scope.ServiceProvider
+                        .GetRequiredService<IRoomUploadingStatusSaver>();
                     ITodayBoundary todayBoundary = scope.ServiceProvider
                         .GetRequiredService<ITodayBoundary>();
                     IAvailabilityInfoSender infoSender = scope.ServiceProvider.
@@ -68,20 +69,16 @@ namespace CalendarIntegrationWeb.Services.BackgroundServices
                     }
                     catch (Exception exception)
                     {
-                        foreach (var roomId in availMessages.Select(elem => elem.RoomId).Distinct())
+                        foreach (int roomId in availMessages.Select(elem => elem.RoomId).Distinct())
                         {
-                            roomUploadStatusRepository.SetStatus(new RoomUploadStatus
-                            {
-                                RoomId = roomId,
-                                Status = "Sending error",
-                                Message = exception.Message
-                            });
+                            roomUploadingStatusSaver.SetRoomStatus(roomId,"TLConnect Sending error", exception.Message);
                         }
                         _logger.LogError(exception, "Error occurred while trying to send data to TLConnect");
                     }
                 }
                 await Task.Delay(_timerPeriod, cancellationToken);
             }
+            _logger.LogInformation("UploadAvailabilityInfoBackgroundService background is stopped");
         }
     }
 }

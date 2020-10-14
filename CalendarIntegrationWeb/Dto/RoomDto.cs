@@ -22,5 +22,8 @@ namespace CalendarIntegrationWeb.Dto
 
         [Required()]
         public string Name { get; set; }
+        
+        public string Status { get; set; }
+        public string StatusMessage { get; set; }
     }
 }
