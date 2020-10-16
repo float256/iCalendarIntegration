@@ -19,12 +19,7 @@ namespace CalendarIntegrationCore.Services.Repositories
             RoomUploadStatus roomUploadStatus = _context.RoomUploadStatusSet.SingleOrDefault(x => x.Id == id);
             if (roomUploadStatus == null)
             {
-                roomUploadStatus = new RoomUploadStatus
-                {
-                    Id = id,
-                    Status = "",
-                    Message = ""
-                };
+                roomUploadStatus = GetDefaultRoomUploadStatus();
             }
             return roomUploadStatus;
         }
@@ -35,12 +30,7 @@ namespace CalendarIntegrationCore.Services.Repositories
                 .SingleOrDefault(elem => elem.RoomId == roomId);
             if (roomUploadStatus == null)
             {
-                roomUploadStatus = new RoomUploadStatus
-                {
-                    RoomId = roomId,
-                    Status = "",
-                    Message = ""
-                };
+                roomUploadStatus = GetDefaultRoomUploadStatus();
             }
             return roomUploadStatus;
         }
@@ -66,6 +56,15 @@ namespace CalendarIntegrationCore.Services.Repositories
             _context.RoomUploadStatusSet.RemoveRange(_context.RoomUploadStatusSet.Where(
                 elem => elem.RoomId == roomId));
             _context.SaveChanges();
+        }
+
+        private RoomUploadStatus GetDefaultRoomUploadStatus()
+        {
+            return new RoomUploadStatus
+            {
+                Status = "",
+                Message = ""
+            };
         }
     }
 }
