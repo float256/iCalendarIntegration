@@ -1,7 +1,6 @@
-import {HttpClient} from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import { ActivatedRoute } from "@angular/router";
-import { Component } from '@angular/core';
-
+import { Component, OnInit } from '@angular/core';
 import { Room } from "../../shared/models/room.model";
 import { Hotel } from "../../shared/models/hotel.model";
 
@@ -22,7 +21,16 @@ export class HotelListComponent {
       (data: Hotel) => this.hotel = data
     );
     this.http.get(`/api/Room/GetByHotelId/${this.hotelId}`).subscribe(
-      (data: Array<Room>) => this.allHotelRooms = data
+      (data: Array<Room>) => {
+        this.allHotelRooms = data;
+        for (let i = 0; i < this.allHotelRooms.length; i++){
+          let currRoom = this.allHotelRooms[i];
+        }
+      }
     );
+  }
+
+  isSuccessStatus(room): boolean {
+    return (room.status.toLowerCase() == 'ok');
   }
 }

@@ -13,6 +13,7 @@ using CalendarIntegrationCore.Services.DataProcessing;
 using CalendarIntegrationCore.Services.DataRetrieving;
 using CalendarIntegrationCore.Services.DataSaving;
 using CalendarIntegrationCore.Services.InitializationHandlers;
+using CalendarIntegrationCore.Services.StatusSaving;
 using Microsoft.Extensions.Logging;
 using CalendarIntegrationWeb.Services;
 using CalendarIntegrationWeb.Services.BackgroundServices;
@@ -50,6 +51,7 @@ namespace CalendarIntegrationWeb
             services.AddScoped<ISoapRequestCreator, SoapRequestCreator>();
             services.AddScoped<IAvailabilityStatusMessageQueue, AvailabilityStatusMessageQueue>();
             services.AddScoped<ITodayBoundary, TodayBoundary>();
+            services.AddScoped<IRoomUploadingStatusSaver, RoomUploadingStatusSaver>();
             
             services.AddScoped<IAvailabilityInfoReceiver, AvailabilityInfoReceiver>();
             services.AddScoped<IBookingInfoSaver, BookingInfoSaver>();
@@ -57,12 +59,13 @@ namespace CalendarIntegrationWeb
             services.AddScoped<IBookingInfoDataProcessor, BookingInfoDataProcessor>();
             services.AddScoped<IAvailabilityMessageConverter, AvailabilityMessageConverter>();
             services.AddScoped<IAvailabilityInfoSynchronizer, AvailabilityInfoSynchronizer>();
+            services.AddScoped<IRoomUploadStatusRepository, RoomUploadStatusRepository>(); 
             services.AddScoped<IRoomAvailabilityInitializationHandler, RoomAvailabilityInitializationHandler>();
             
             services.AddScoped<ITLConnectService, TLConnectServiceClient>();
             services.AddHostedService<DownloadAvailabilityInfoBackgroundService>();
             services.AddHostedService<UploadAvailabilityInfoBackgroundService>();
-            
+  
             services.Configure<DateSynchronizationCommonOptions>(Configuration.GetSection("DateSynchronizationCommonOptions"));
             services.Configure<DownloadAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("DownloadAvailabilityInfoBackgroundServiceOptions"));
             services.Configure<UploadAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("UploadAvailabilityInfoBackgroundServiceOptions"));
@@ -81,7 +84,7 @@ namespace CalendarIntegrationWeb
             {
                 app.UseExceptionHandler("/Error");
             }
-
+            
             app.UseStaticFiles();
             if (!env.IsDevelopment())
             {

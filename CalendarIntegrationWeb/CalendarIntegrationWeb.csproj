@@ -46,6 +46,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\shared\formvalidation.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\shared\models\hotel.model.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\shared\models\room.model.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\shared\models\roomuploadstatus.model.ts" />
   </ItemGroup>
 
   <ItemGroup>

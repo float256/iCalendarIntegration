@@ -56,10 +56,10 @@ namespace CalendarIntegrationCore.Tests.Services.DataRetrieving
         }
 
         [Fact]
-        public void AvailabilityInfoSender_GetCalendarByUrl_ResponseIsNotOK_StringWithCalendar()
+        public void AvailabilityInfoSender_GetCalendarByUrl_ResponseIsNotOK_HttpRequestException()
         {
             // Arrange
-            string expectedCalendar = String.Empty;
+            string expectedExceptionMessage = "One or more errors occurred. (Response status code does not indicate success: 404 (Not Found).)";
             string url = "http://example.com";
 
             Mock<IHttpClientFactory> mockHttpClientFactory = new Mock<IHttpClientFactory>(MockBehavior.Strict);
@@ -72,8 +72,7 @@ namespace CalendarIntegrationCore.Tests.Services.DataRetrieving
                     ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(new HttpResponseMessage
                 {
-                    StatusCode = HttpStatusCode.NotFound,
-                    Content = new StringContent(expectedCalendar)
+                    StatusCode = HttpStatusCode.NotFound
                 });
 
             HttpClient httpClient = new HttpClient(mockHttpMessageHandler.Object)
@@ -86,10 +85,11 @@ namespace CalendarIntegrationCore.Tests.Services.DataRetrieving
             AvailabilityInfoReceiver availabilityInfoReceiver = new AvailabilityInfoReceiver(
                 mockHttpClientFactory.Object,
                 mockLogger.Object);
-            string actualCalendar = availabilityInfoReceiver.GetCalendarByUrl(url, CancellationToken.None).Result;
+            AggregateException exception = Assert.Throws<AggregateException>(
+                () => availabilityInfoReceiver.GetCalendarByUrl(url, CancellationToken.None).Result);
 
             // Assert
-            Assert.Equal(expectedCalendar, actualCalendar);
+            Assert.Equal(expectedExceptionMessage, exception.Message);
         }
     }
 }

@@ -11,16 +11,78 @@
   <p class="h5 mr-4 pr-2">Rooms</p>
   <a routerLink="/Room/Add/{{ hotelId }}" class="btn btn-primary btn-sm" role="button" aria-disabled="true">+ Add room</a>
 </div>
-<div class="list-group" *ngFor="let currRoom of allHotelRooms">
-  <div class="list-group-item d-flex justify-content-between py-0 pr-0">
-    <a routerLink="/Room/Edit/{{ currRoom?.id }}" class="row py-2 pl-3 br-1 w-100 border-right">{{ currRoom?.name }}</a>
+<div class="list-group">
+  <div class="list-group-item d-flex justify-content-between py-0 pr-0 text-center">
+    <p class="row py-2 pl-3 col-md-2 mb-0 br-1 text-secondary border-right d-inline-block text-truncate">
+      Room name
+    </p>
+    <p class="row col-md-5 mb-0 py-2 pl-4 text-secondary ml-2 border-right d-inline-block text-truncate">
+      Url
+    </p>
+    <p class="col-md-2 pl-4 border-right text-secondary my-0 pt-2">
+      TLApiCode
+    </p>
+    <p class="w-100 border-right pt-2 my-0 text-secondary border-right d-inline-block text-truncate mb-0">
+      Status
+    </p>
+    <div class="dropleft ml-auto w-auto row invisible">
+      <button class="btn shadow-none mt-auto mb-auto ml-1 mr-3">
+        <i class="fas fa-ellipsis-v"></i>
+      </button>
+    </div>
+  </div>
+  <div class="list-group-item d-flex justify-content-between py-0 pr-0 text-center" *ngFor="let currRoom of allHotelRooms">
+    <a routerLink="/Room/Edit/{{ currRoom?.id }}" class="row py-2 pl-3 col-md-2 br-1 border-right d-inline-block text-truncate">
+      {{ currRoom?.name }}
+    </a>
+    <a href="{{ currRoom?.url }}" class="row col-md-5 py-2 pl-4 ml-2 border-right d-inline-block text-truncate">
+      {{ currRoom?.url }}
+    </a>
+    <p class="col-md-2 pl-4 border-right my-0 pt-2">
+      {{ currRoom?.tlApiCode }}
+    </p>
+    <button type="button" *ngIf="currRoom?.status.length != 0"
+            class="btn btn-white {{ isSuccessStatus(currRoom) ? 'text-success' : 'text-danger' }} shadow-none w-100 border-right pt-2 my-0 border-right d-inline-block text-truncate"
+            data-toggle="modal"
+            [attr.data-target]="'#room' + currRoom?.id.toString() + 'UploadIndex'">
+      {{ currRoom?.status }}
+    </button>
+    <p *ngIf="currRoom?.status.length == 0" class="w-100 border-right pt-2 my-0 border-right d-inline-block text-truncate text-secondary">
+      Not specified
+    </p>
     <div class="dropleft ml-auto w-auto row">
-      <button class="btn shadow-none mt-auto mb-auto mx-3" id="room1DropdownMenu" data-toggle="dropdown">
+      <button class="btn shadow-none mt-auto mb-auto ml-1 mr-3" id="room1DropdownMenu" data-toggle="dropdown">
         <i class="fas fa-ellipsis-v"></i>
       </button>
       <div class="dropdown-menu rounded-0" aria-labelledby="room1DropdownMenu">
         <a class="dropdown-item" routerLink="/Room/Edit/{{ currRoom?.id }}">Edit</a>
         <a class="dropdown-item" routerLink="/Room/Delete/{{ currRoom?.id }}">Delete</a>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div *ngIf="currRoom?.status.length != 0" class="modal fade text-left" id="room{{ currRoom?.id }}UploadIndex" tabindex="-1" role="dialog" [attr.aria-labelledby]="'room' + currRoom?.id.toString() + 'UploadLabel'" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <p class="h5 modal-title" id="room{{ currRoom?.id }}UploadLabel">Room "{{ currRoom.name }}" information uploading status</p>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p class="h6">Status:&emsp;&emsp;
+              <span class="{{ isSuccessStatus(currRoom) ? 'text-success' : 'text-danger' }}">
+                {{ currRoom?.status }}
+              </span>
+            </p>
+            <p class="h6">Status message:
+              <span class="{{ isSuccessStatus(currRoom) ? 'text-success' : 'text-danger' }}">
+                {{ currRoom?.statusMessage }}
+              </span>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
