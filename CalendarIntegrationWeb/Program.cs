@@ -9,6 +9,7 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace CalendarIntegrationWeb
 {
@@ -21,8 +22,20 @@ namespace CalendarIntegrationWeb
         {
             string appWorkingMode = Environment.GetEnvironmentVariable("APP_WORKING_MODE");
             string envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-            IConfigurationRoot config = new ConfigurationBuilder()
-                .AddJsonFile(path: $"appsettings.{envName}.json").Build();
+            
+            IConfigurationRoot config;
+            if (File.Exists("appsettings.prod.json"))
+            {
+                config = new ConfigurationBuilder()
+                    .AddJsonFile($"appsettings.{envName}.json")
+                    .AddJsonFile($"appsettings.prod.json")
+                    .Build();
+            }
+            else
+            {
+                config = new ConfigurationBuilder().AddJsonFile(path: $"appsettings.{envName}.json").Build();
+            }
+
             NLog.Extensions.Logging.ConfigSettingLayoutRenderer.DefaultConfiguration = config;
             var logger = NLog.Web.NLogBuilder.ConfigureNLog("NLog.config").GetCurrentClassLogger();
             try

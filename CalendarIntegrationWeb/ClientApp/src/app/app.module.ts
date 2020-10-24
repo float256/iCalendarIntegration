@@ -17,6 +17,8 @@ import { RoomAddComponent } from './room/add/room-add.component';
 import { RoomDeleteComponent } from './room/delete/room-delete.component';
 import { RoomEditComponent } from './room/edit/room-edit.component';
 
+import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -28,7 +30,8 @@ import { RoomEditComponent } from './room/edit/room-edit.component';
     HotelDeleteComponent,
     RoomAddComponent,
     RoomDeleteComponent,
-    RoomEditComponent
+    RoomEditComponent,
+    BreadcrumbsComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),

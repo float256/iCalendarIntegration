@@ -19,7 +19,7 @@ export class RoomAddComponent {
   public form = new FormGroup({
     HotelId: new FormControl(),
     TLApiCode: new FormControl('', [Validators.required, FormValidation.onlySpacesValidation]),
-    Url: new FormControl('', [Validators.required, FormValidation.onlySpacesValidation]),
+    Url: new FormControl('', [Validators.required, FormValidation.onlySpacesValidation, FormValidation.urlValidation]),
     Name: new FormControl('', [Validators.required, FormValidation.onlySpacesValidation]),
   });
 

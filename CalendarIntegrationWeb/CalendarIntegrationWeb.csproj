@@ -34,6 +34,7 @@
   <ItemGroup>
     <!-- Don't publish the SPA source files, but do show them in the project files list -->
     <Content Remove="$(SpaRoot)**" />
+    <Content Include="ClientApp\src\app\breadcrumbs\breadcrumbs.component.html" />
     <None Remove="$(SpaRoot)**" />
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
   </ItemGroup>
@@ -43,6 +44,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Include="ClientApp\src\app\breadcrumbs\breadcrumbs.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\shared\formvalidation.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\shared\models\hotel.model.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\shared\models\room.model.ts" />

@@ -7,6 +7,8 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using System;
+
 namespace TLConnect
 {
     
@@ -38103,7 +38105,6 @@ namespace TLConnect
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.2")]
     public partial class TLConnectServiceClient : System.ServiceModel.ClientBase<TLConnect.ITLConnectService>, TLConnect.ITLConnectService
     {
-        
         /// <summary>
         /// Implement this partial method to configure the service endpoint.
         /// </summary>
@@ -38369,7 +38370,7 @@ namespace TLConnect
         {
             if ((endpointConfiguration == EndpointConfiguration.BasicHttpBinding_ITLConnectService))
             {
-                return new System.ServiceModel.EndpointAddress("https://www.qatl.ru/api/TLConnect.svc");
+                return new System.ServiceModel.EndpointAddress(Environment.GetEnvironmentVariable("TLCONNECT_ENDPOINT_ADDRESS"));
             }
             throw new System.InvalidOperationException(string.Format("Could not find endpoint with name \'{0}\'.", endpointConfiguration));
         }
