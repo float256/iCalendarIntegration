@@ -19,7 +19,6 @@ export class FormValidation {
       '(\\#[-a-z\\d_]*)?$','i');
     let url: string = control.value as string;
 
-    console.log(regexpUrlExpression.test(url));
     if (regexpUrlExpression.test(url)) {
       return null;
     } else {
