@@ -24,11 +24,11 @@ namespace CalendarIntegrationWeb
             string envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             
             IConfigurationRoot config;
-            if (File.Exists("appsettings.prod.json"))
+            if (File.Exists("appsettings.json"))
             {
                 config = new ConfigurationBuilder()
                     .AddJsonFile($"appsettings.{envName}.json")
-                    .AddJsonFile($"appsettings.prod.json")
+                    .AddJsonFile($"appsettings.json")
                     .Build();
             }
             else
