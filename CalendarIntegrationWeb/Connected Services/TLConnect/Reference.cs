@@ -38370,7 +38370,7 @@ namespace TLConnect
         {
             if ((endpointConfiguration == EndpointConfiguration.BasicHttpBinding_ITLConnectService))
             {
-                return new System.ServiceModel.EndpointAddress(Environment.GetEnvironmentVariable("TLCONNECT_ENDPOINT_ADDRESS"));
+                return new System.ServiceModel.EndpointAddress("https://www.qatl.ru/api/TLConnect.svc");
             }
             throw new System.InvalidOperationException(string.Format("Could not find endpoint with name \'{0}\'.", endpointConfiguration));
         }
