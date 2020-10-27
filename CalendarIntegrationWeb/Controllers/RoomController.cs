@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using CalendarIntegrationCore.Models;
-using CalendarIntegrationCore.Services;
-using CalendarIntegrationCore.Services.DataSaving;
 using CalendarIntegrationCore.Services.InitializationHandlers;
 using CalendarIntegrationCore.Services.Repositories;
 using CalendarIntegrationCore.Services.StatusSaving;
@@ -22,7 +18,6 @@ namespace CalendarIntegrationWeb.Controllers
         private readonly IHotelRepository _hotelRepository;
         private readonly IRoomAvailabilityInitializationHandler _roomAvailabilityInitializationHandler;
         private readonly IRoomUploadingStatusSaver _roomUploadingStatusSaver;
-        private readonly IRoomUploadStatusRepository _roomUploadStatusRepository;
         private readonly ILogger _logger;
         
         public RoomController(
@@ -30,14 +25,12 @@ namespace CalendarIntegrationWeb.Controllers
             IHotelRepository hotelRepository,
             IRoomAvailabilityInitializationHandler roomAvailabilityInitializationHandler,
             IRoomUploadingStatusSaver roomUploadingStatusSaver,
-            IRoomUploadStatusRepository roomUploadStatusRepository,
             ILogger<RoomController> logger)
         {
             _roomRepository = roomRepository;
             _hotelRepository = hotelRepository;
             _roomAvailabilityInitializationHandler = roomAvailabilityInitializationHandler;
             _roomUploadingStatusSaver = roomUploadingStatusSaver;
-            _roomUploadStatusRepository = roomUploadStatusRepository;
             _logger = logger;
         }
 
@@ -47,16 +40,13 @@ namespace CalendarIntegrationWeb.Controllers
             Room room = _roomRepository.Get(id);
             if (room != default)
             {
-                RoomUploadStatus roomStatus = _roomUploadStatusRepository.GetByRoomId(room.Id);
                 return Ok(new RoomDto
                 {
                     Id = room.Id,
                     HotelId = room.HotelId,
                     Name = room.Name,
                     TLApiCode = room.TLApiCode,
-                    Url = room.Url,
-                    Status = roomStatus.Status,
-                    StatusMessage = roomStatus.Message
+                    Url = room.Url
                 });
             }
             else
@@ -69,19 +59,13 @@ namespace CalendarIntegrationWeb.Controllers
         public ActionResult<List<Room>> GetByHotelId(int hotelId)
         {
             List<RoomDto> result = _roomRepository.GetByHotelId(hotelId).Select(
-                room =>
+                room => new RoomDto
                 {
-                    RoomUploadStatus currRoomStatus = _roomUploadStatusRepository.GetByRoomId(room.Id);
-                    return new RoomDto
-                    {
-                        Id = room.Id,
-                        HotelId = room.HotelId,
-                        Name = room.Name,
-                        TLApiCode = room.TLApiCode,
-                        Url = room.Url,
-                        Status = currRoomStatus.Status,
-                        StatusMessage = currRoomStatus.Message
-                    };
+                    Id = room.Id,
+                    HotelId = room.HotelId,
+                    Name = room.Name,
+                    TLApiCode = room.TLApiCode,
+                    Url = room.Url
                 }).ToList();
             return Ok(result);
         }
@@ -90,19 +74,13 @@ namespace CalendarIntegrationWeb.Controllers
         public ActionResult<List<RoomDto>> GetAll()
         {
             return _roomRepository.GetAll().Select(
-                room =>
+                room => new RoomDto
                 {
-                    RoomUploadStatus currRoomStatus = _roomUploadStatusRepository.GetByRoomId(room.Id);
-                    return new RoomDto
-                    {
-                        Id = room.Id,
-                        HotelId = room.HotelId,
-                        Name = room.Name,
-                        TLApiCode = room.TLApiCode,
-                        Url = room.Url,
-                        Status = currRoomStatus.Status,
-                        StatusMessage = currRoomStatus.Message
-                    };
+                    Id = room.Id,
+                    HotelId = room.HotelId,
+                    Name = room.Name,
+                    TLApiCode = room.TLApiCode,
+                    Url = room.Url
                 }).ToList();
         }
 

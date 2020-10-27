@@ -35,13 +35,13 @@
     <p class="col-md-2 pl-4 border-right my-0 pt-2">
       {{ currRoom?.tlApiCode }}
     </p>
-    <button type="button" *ngIf="currRoom?.status.length != 0"
-            class="btn btn-white {{ isSuccessStatus(currRoom) ? 'text-success' : 'text-danger' }} shadow-none w-100 border-right pt-2 my-0 border-right d-inline-block text-truncate"
+    <button type="button" *ngIf="getRoomStatus(currRoom?.id).length != 0"
+            class="btn btn-white {{ isSuccessStatus(currRoom?.id) ? 'text-success' : 'text-danger' }} shadow-none w-100 border-right pt-2 my-0 border-right d-inline-block text-truncate"
             data-toggle="modal"
             [attr.data-target]="'#room' + currRoom?.id.toString() + 'UploadIndex'">
-      {{ currRoom?.status }}
+      {{ getRoomStatus(currRoom?.id) }}
     </button>
-    <p *ngIf="currRoom?.status.length == 0" class="w-100 border-right pt-2 my-0 border-right d-inline-block text-truncate text-secondary">
+    <p *ngIf="getRoomStatus(currRoom?.id).length == 0" class="w-100 border-right pt-2 my-0 border-right d-inline-block text-truncate text-secondary">
       Not specified
     </p>
     <div class="dropleft ml-auto w-auto row">
@@ -55,7 +55,7 @@
     </div>
 
     <!-- Modal -->
-    <div *ngIf="currRoom?.status.length != 0" class="modal fade text-left" id="room{{ currRoom?.id }}UploadIndex" tabindex="-1" role="dialog" [attr.aria-labelledby]="'room' + currRoom?.id.toString() + 'UploadLabel'" aria-hidden="true">
+    <div *ngIf="getRoomStatus(currRoom?.id).length != 0" class="modal fade text-left" id="room{{ currRoom?.id }}UploadIndex" tabindex="-1" role="dialog" [attr.aria-labelledby]="'room' + currRoom?.id.toString() + 'UploadLabel'" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -66,13 +66,13 @@
           </div>
           <div class="modal-body">
             <p class="h6">Status:&emsp;&emsp;
-              <span class="{{ isSuccessStatus(currRoom) ? 'text-success' : 'text-danger' }}">
-                {{ currRoom?.status }}
+              <span class="{{ isSuccessStatus(currRoom?.id) ? 'text-success' : 'text-danger' }}">
+                {{ getRoomStatus(currRoom?.id) }}
               </span>
             </p>
             <p class="h6">Status message:
-              <span class="{{ isSuccessStatus(currRoom) ? 'text-success' : 'text-danger' }}">
-                {{ currRoom?.statusMessage }}
+              <span class="{{ isSuccessStatus(currRoom?.id) ? 'text-success' : 'text-danger' }}">
+                {{ getRoomStatusMessage(currRoom?.id) }}
               </span>
             </p>
           </div>
