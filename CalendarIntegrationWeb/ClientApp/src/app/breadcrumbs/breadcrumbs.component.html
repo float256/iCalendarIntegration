@@ -1,0 +1,8 @@
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb bg-white pb-0 pl-0">
+    <li class="breadcrumb-item" aria-current="page" *ngFor="let menuItemPair of menuItemLinks">
+      <a *ngIf="getUrl(menuItemPair).length > 0" routerLink="{{ getUrl(menuItemPair) }}">{{ menuItemPair[0] }}</a>
+      <span class="active" *ngIf="getUrl(menuItemPair).length == 0">{{ getName(menuItemPair) }}</span>
+    </li>
+  </ol>
+</nav>

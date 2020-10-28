@@ -7,6 +7,8 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using System;
+
 namespace TLConnect
 {
     
@@ -38103,7 +38105,6 @@ namespace TLConnect
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Tools.ServiceModel.Svcutil", "2.0.2")]
     public partial class TLConnectServiceClient : System.ServiceModel.ClientBase<TLConnect.ITLConnectService>, TLConnect.ITLConnectService
     {
-        
         /// <summary>
         /// Implement this partial method to configure the service endpoint.
         /// </summary>

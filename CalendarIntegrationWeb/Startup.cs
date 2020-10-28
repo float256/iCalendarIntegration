@@ -69,6 +69,11 @@ namespace CalendarIntegrationWeb
             services.Configure<DateSynchronizationCommonOptions>(Configuration.GetSection("DateSynchronizationCommonOptions"));
             services.Configure<DownloadAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("DownloadAvailabilityInfoBackgroundServiceOptions"));
             services.Configure<UploadAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("UploadAvailabilityInfoBackgroundServiceOptions"));
+
+            services.AddScoped<ITLConnectService, TLConnectServiceClient>(
+                sp => new TLConnectServiceClient(
+                    TLConnectServiceClient.EndpointConfiguration.BasicHttpBinding_ITLConnectService,
+                    Configuration.GetSection("TLConnectServiceURL").Value));
             services.AddHttpClient();
         }
 

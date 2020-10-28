@@ -1,14 +1,5 @@
-<nav aria-label="breadcrumb">
-  <ol class="breadcrumb bg-white pb-0 pl-0">
-    <li class="breadcrumb-item" aria-current="page">
-      <a routerLink="/">Home</a>
-    </li>
-    <li class="breadcrumb-item" aria-current="page">
-      <a routerLink="/Hotel/{{ hotel?.id }}">{{ hotel?.name }}</a>
-    </li>
-    <li class="breadcrumb-item active" aria-current="page">Add Room</li>
-  </ol>
-</nav>
+<breadcrumbs [menuItemLinks]="[['Home', '/'], [hotel?.name, '/Hotel/' + hotel?.id], ['Add Room', '']]"></breadcrumbs>
+
 <p class="h3 mb-4">Add room in "{{ hotel?.name }}"</p>
 <form (ngSubmit)="onSubmit()" [formGroup]="form">
   <div class="form-group row">
@@ -22,7 +13,7 @@
   <div class="form-group row">
     <label for="TLApiCodeField" class="col-sm-2 col-form-label">TLApiCode</label>
     <div class="col-sm-10">
-      <input type="text" class="form-control" id="TLApiCodeField"formControlName="TLApiCode" placeholder="Room TLApiCode">
+      <input type="text" class="form-control" id="TLApiCodeField" formControlName="TLApiCode" placeholder="Room TLApiCode">
     </div>
     <div class="col-md-10 offset-2 text-danger" *ngIf="formControls.TLApiCode.touched && formControls.TLApiCode.errors?.required">TLApiCode is required</div>
     <div class="col-md-10 offset-2 text-danger" *ngIf="formControls.TLApiCode.touched && formControls.TLApiCode.errors?.onlySpaces">A value consisting only of spaces is not valid</div>
@@ -34,6 +25,7 @@
     </div>
     <div class="col-md-10 offset-2 text-danger" *ngIf="formControls.Url.touched && formControls.Url.errors?.required">Url is required</div>
     <div class="col-md-10 offset-2 text-danger" *ngIf="formControls.Url.touched && formControls.Url.errors?.onlySpaces">A value consisting only of spaces is not valid</div>
+    <div class="col-md-10 offset-2 text-danger" *ngIf="formControls.Url.touched && formControls.Url.errors?.incorrectUrl">URL is incorrect</div>
   </div>
   <input type="hidden" name="hotelId" value="{{hotelId}}" formControlName="HotelId" />
   <button type="submit" class="btn btn-primary" [disabled]="!form.valid">Submit</button>
