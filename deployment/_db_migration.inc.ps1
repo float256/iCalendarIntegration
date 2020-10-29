@@ -16,21 +16,26 @@ function GetUtilParams($env, $settingsName) {
     $dir            = $dbSettings[$settingsName].dir;
     $path           = $dbSettings[$settingsName].path;
 
-    $file = Get-ChildItem -Path ($basePath + "\" + $path) | where-object { $_.Name -eq "appsettings." + $env + ".json"}
+    Add-Type -assembly "system.io.compression.filesystem"
+    $zip = [io.compression.zipfile]::OpenRead($basePath + "\" + $path)
+
+    $file = $zip.Entries | where-object { $_.Name -eq "appsettings." + $env + ".json"}
     if ( -not $file ) {
-        $file = Get-ChildItem -Path ($basePath + "\" + $path) | where-object { $_.Name -eq "sharedSettings." + $env +".json"}
+        $file = $zip.Entries | where-object { $_.Name -eq "sharedSettings." + $env + ".json"}
     }
-    $file = $basePath + "\" + $path + "\" + $file
     if ( -not $file ) {
         throw [System.ArgumentException] "No configuration file found for $settingsName";
     }
 
-    $reader = New-Object IO.StreamReader(Resolve-Path -Path $file)
+    $stream = $file.Open()
+
+    $reader = New-Object IO.StreamReader($stream)
 
     $connStr =  ($reader.ReadToEnd() | ConvertFrom-Json).ConnectionStrings.$connStrName
 
     $reader.Close()
-    # $zip.Dispose()
+    $stream.Close()
+    $zip.Dispose()
 
     if( [string]::IsNullOrEmpty($connStr) ) {
         throw [System.ArgumentException] "No connection string found for $settingsName";
