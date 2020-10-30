@@ -46,11 +46,6 @@ namespace CalendarIntegrationWeb
                                     .ConfigureServices(
                                         services => services
                                             .AddSingleton<StatelessServiceContext>(serviceContext))
-                                    .ConfigureAppConfiguration((builderContext, config) =>
-                                    {
-                                        var envName = builderContext.HostingEnvironment.EnvironmentName;
-                                        config.AddJsonFile($"appsettings.{envName}.json", optional: false, reloadOnChange: true);
-                                    })
                                     .UseContentRoot(Directory.GetCurrentDirectory())
                                     .UseStartup<Startup>()
                                     .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.None)
