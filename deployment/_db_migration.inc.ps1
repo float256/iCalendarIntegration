@@ -6,7 +6,7 @@ $dbSettings = @{
     "CalendarIntegrationWeb" = @{
         "connStrName"   = "default";
         "dir"           = "db-migrations";
-        "path"          = "sf-package\CalendarIntegrationWebPkg\Code";
+        "path"          = "sf-package\CalendarIntegrationWebPkg\Code.zip";
         "localPath"     = "CalendarIntegrationWeb";
     };
 };
