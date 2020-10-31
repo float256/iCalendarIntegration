@@ -14,7 +14,6 @@ using CalendarIntegrationCore.Services.DataProcessing;
 using CalendarIntegrationCore.Services.DataRetrieving;
 using CalendarIntegrationCore.Services.DataSaving;
 using CalendarIntegrationCore.Services.InitializationHandlers;
-using CalendarIntegrationCore.Services.Observers;
 using CalendarIntegrationCore.Services.StatusSaving;
 using CalendarIntegrationWeb.Hubs;
 using Microsoft.Extensions.Logging;
@@ -22,6 +21,7 @@ using CalendarIntegrationWeb.Services;
 using CalendarIntegrationWeb.Services.BackgroundServices;
 using CalendarIntegrationWeb.Services.DataUploading;
 using TLConnect;
+using CalendarIntegrationWeb.Observers;
 
 namespace CalendarIntegrationWeb
 {
@@ -110,20 +110,20 @@ namespace CalendarIntegrationWeb
             
             app.UseRouting();
             app.UseWebSockets();
-            app.UseCors(builder =>
-            {
-                builder.WithOrigins("https://localhost:4200")
-                    .AllowAnyHeader()
-                    .WithMethods("GET", "POST")
-                    .AllowCredentials();
-            });
+            //app.UseCors(builder =>
+            //{
+            //    builder.WithOrigins("https://localhost:4200")
+            //        .AllowAnyHeader()
+            //        .WithMethods("GET", "POST")
+            //        .AllowCredentials();
+            //});
             
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
-                endpoints.MapHub<RoomUploadStatusHub>("/RoomUploadStatus");
+                endpoints.MapHub<RoomUploadStatusHub>( "/RoomUploadStatusHub" );
             });
 
             app.UseSpa(spa =>

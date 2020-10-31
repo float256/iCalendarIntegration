@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
-import {HubConnection, HubConnectionBuilder} from '@aspnet/signalr';
+import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
@@ -9,14 +10,16 @@ export class AppComponent implements OnInit{
   title = 'app';
   private hubConnection: HubConnection;
 
+  constructor(private http: HttpClient) { }
+
   ngOnInit() {
     this.hubConnection = new HubConnectionBuilder()
-      .withUrl('http://localhost:57328/RoomUploadStatus')
+      .withUrl('./RoomUploadStatusHub')
       .build();
     this.hubConnection.start()
       .then(() => console.log('Connection started!'))
       .catch(err => console.log('Error while establishing connection :('));
-    this.hubConnection.on('RoomUploadStatus', (data) => {
+    this.hubConnection.on('transferRoomUploadStatus', (data) => {
       console.log(data)
     });
     this.hubConnection.onclose(() => {
@@ -24,10 +27,19 @@ export class AppComponent implements OnInit{
         this.hubConnection.start()
           .then(() => console.log('Connection started!'))
           .catch(err => console.log('Error while establishing connection :('));
-        this.hubConnection.on('RoomUploadStatus', (data) => {
+        this.hubConnection.on('transferRoomUploadStatus', (data) => {
           console.log(data)
         });
       },3000);
     });
+
+    //this.startHttpRequest();
+  }
+
+  private startHttpRequest = () => {
+    this.http.get('./api/RoomUploadStatus')
+      .subscribe(res => {
+        console.log(res);
+      })
   }
 }

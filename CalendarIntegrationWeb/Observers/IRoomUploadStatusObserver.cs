@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using CalendarIntegrationCore.Models;
 
-namespace CalendarIntegrationCore.Services.Observers
+namespace CalendarIntegrationWeb.Observers
 {
-    public interface IRoomUploadStatusObserver: IObserver<RoomUploadStatus>
+    public interface IRoomUploadStatusObserver : IObserver<RoomUploadStatus>
     {
         Dictionary<int, RoomUploadStatus> UploadStatusesForAllRooms { get; }
     }
