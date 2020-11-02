@@ -14,10 +14,7 @@ using CalendarIntegrationCore.Services.DataProcessing;
 using CalendarIntegrationCore.Services.DataRetrieving;
 using CalendarIntegrationCore.Services.DataSaving;
 using CalendarIntegrationCore.Services.InitializationHandlers;
-using CalendarIntegrationCore.Services.StatusSaving;
 using CalendarIntegrationWeb.Hubs;
-using Microsoft.Extensions.Logging;
-using CalendarIntegrationWeb.Services;
 using CalendarIntegrationWeb.Services.BackgroundServices;
 using CalendarIntegrationWeb.Services.DataUploading;
 using TLConnect;
@@ -54,7 +51,6 @@ namespace CalendarIntegrationWeb
             services.AddScoped<ISoapRequestCreator, SoapRequestCreator>();
             services.AddScoped<IAvailabilityStatusMessageQueue, AvailabilityStatusMessageQueue>();
             services.AddScoped<ITodayBoundary, TodayBoundary>();
-            services.AddScoped<IRoomUploadingStatusSaver, RoomUploadingStatusSaver>();
             
             services.AddScoped<IAvailabilityInfoReceiver, AvailabilityInfoReceiver>();
             services.AddScoped<IBookingInfoSaver, BookingInfoSaver>();
@@ -62,14 +58,13 @@ namespace CalendarIntegrationWeb
             services.AddScoped<IBookingInfoDataProcessor, BookingInfoDataProcessor>();
             services.AddScoped<IAvailabilityMessageConverter, AvailabilityMessageConverter>();
             services.AddScoped<IAvailabilityInfoSynchronizer, AvailabilityInfoSynchronizer>();
-            services.AddScoped<IRoomUploadStatusRepository, RoomUploadStatusRepository>(); 
             services.AddScoped<IRoomAvailabilityInitializationHandler, RoomAvailabilityInitializationHandler>();
             
             services.AddScoped<ITLConnectService, TLConnectServiceClient>();
             services.AddHostedService<DownloadAvailabilityInfoBackgroundService>();
             services.AddHostedService<UploadAvailabilityInfoBackgroundService>();
 
-            services.AddScoped<IRoomUploadStatusObserver, RoomUploadStatusObserver>();
+            services.AddSingleton<IRoomUploadStatusObserver, RoomUploadStatusObserver>();
             services.AddScoped(serviceProvider  => new List<IObserver<RoomUploadStatus>>
             {
                 serviceProvider.GetService<IRoomUploadStatusObserver>()
@@ -110,14 +105,7 @@ namespace CalendarIntegrationWeb
             
             app.UseRouting();
             app.UseWebSockets();
-            //app.UseCors(builder =>
-            //{
-            //    builder.WithOrigins("https://localhost:4200")
-            //        .AllowAnyHeader()
-            //        .WithMethods("GET", "POST")
-            //        .AllowCredentials();
-            //});
-            
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

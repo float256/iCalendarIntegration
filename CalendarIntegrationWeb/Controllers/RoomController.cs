@@ -3,7 +3,6 @@ using System.Linq;
 using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services.InitializationHandlers;
 using CalendarIntegrationCore.Services.Repositories;
-using CalendarIntegrationCore.Services.StatusSaving;
 using CalendarIntegrationWeb.Dto;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -17,20 +16,17 @@ namespace CalendarIntegrationWeb.Controllers
         private readonly IRoomRepository _roomRepository;
         private readonly IHotelRepository _hotelRepository;
         private readonly IRoomAvailabilityInitializationHandler _roomAvailabilityInitializationHandler;
-        private readonly IRoomUploadingStatusSaver _roomUploadingStatusSaver;
         private readonly ILogger _logger;
         
         public RoomController(
             IRoomRepository roomRepository,
             IHotelRepository hotelRepository,
             IRoomAvailabilityInitializationHandler roomAvailabilityInitializationHandler,
-            IRoomUploadingStatusSaver roomUploadingStatusSaver,
             ILogger<RoomController> logger)
         {
             _roomRepository = roomRepository;
             _hotelRepository = hotelRepository;
             _roomAvailabilityInitializationHandler = roomAvailabilityInitializationHandler;
-            _roomUploadingStatusSaver = roomUploadingStatusSaver;
             _logger = logger;
         }
 
@@ -103,7 +99,6 @@ namespace CalendarIntegrationWeb.Controllers
                 }
                 catch (RoomAvailabilityInitializationHandlerException exception)
                 {
-                    _roomUploadingStatusSaver.SetRoomStatus(room.Id, "Add Availability Message Error", exception.Message);
                     _logger.LogError(exception, "Error occurred while trying to initialize room availability");                    
                 }
                 return Ok(room);
@@ -137,7 +132,6 @@ namespace CalendarIntegrationWeb.Controllers
             }
             catch (RoomAvailabilityInitializationHandlerException exception)
             {
-                _roomUploadingStatusSaver.SetRoomStatus(newRoom.Id, "Add Availability Message Error", exception.Message);
                 _logger.LogError(exception, "Error occurred while trying to adding availability messages");
             }
         }
