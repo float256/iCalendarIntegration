@@ -27,7 +27,8 @@ namespace CalendarIntegrationCore.Services
         private readonly ICalendarParser _calendarParser;
         private readonly IAvailabilityStatusMessageQueue _queue;
         private readonly ILogger _logger;
-
+        private readonly IRoomUploadStatusRepository _roomUploadStatusRepository;
+        
         private readonly List<IObserver<RoomUploadStatus>> _observers;
         
         public AvailabilityInfoSynchronizer(
@@ -41,6 +42,7 @@ namespace CalendarIntegrationCore.Services
             ICalendarParser calendarParser,
             ILogger<AvailabilityInfoSynchronizer> logger,
             IAvailabilityMessageConverter messageConverter,
+            IRoomUploadStatusRepository roomUploadStatusRepository,
             List<IObserver<RoomUploadStatus>> observers)
         {
             _hotelRepository = hotelRepository;
@@ -53,6 +55,7 @@ namespace CalendarIntegrationCore.Services
             _logger = logger;
             _queue = queue;
             _messageConverter = messageConverter;
+            _roomUploadStatusRepository = roomUploadStatusRepository;
             _observers = observers;
         }
 
@@ -68,6 +71,7 @@ namespace CalendarIntegrationCore.Services
                 foreach (Room currRoom in _roomRepository.GetByHotelId(currHotel.Id))
                 {
                     string calendar;
+                    RoomUploadStatus newRoomUploadStatus;
 
                     if (cancelToken.IsCancellationRequested)
                     {
@@ -80,12 +84,15 @@ namespace CalendarIntegrationCore.Services
                     }
                     catch (HttpRequestException exception)
                     {
-                        SendAllObservers(new RoomUploadStatus
+                        newRoomUploadStatus= new RoomUploadStatus
                         {
                             Message = exception.Message,
                             Status = "Calendar Downloading Error",
                             RoomId = currRoom.Id
-                        });
+                        };
+                        
+                        SendAllObservers(newRoomUploadStatus);
+                        _roomUploadStatusRepository.SetStatus(newRoomUploadStatus);
                         _logger.LogError(exception, "Error occurred while trying to get the calendar from the URL");
                         continue;
                     }
@@ -98,12 +105,15 @@ namespace CalendarIntegrationCore.Services
                     }
                     catch (CalendarParserException exception)
                     {
-                        SendAllObservers(new RoomUploadStatus
+                        newRoomUploadStatus = new RoomUploadStatus
                         {
                             Message = exception.Message,
                             Status = "Calendar Parsing Error",
                             RoomId = currRoom.Id
-                        });
+                        };
+                        
+                        _roomUploadStatusRepository.SetStatus(newRoomUploadStatus);
+                        SendAllObservers(newRoomUploadStatus);
                         _logger.LogError(exception, "Error occurred while trying to parse the calendar");
                         continue;
                     }
@@ -114,13 +124,15 @@ namespace CalendarIntegrationCore.Services
                             .OrderBy(elem => elem.StartDate).ToList();
                     _infoSaver.SaveChanges(changes);
                     _queue.EnqueueMultiple(availabilityStatusMessages);
-                    
-                    SendAllObservers(new RoomUploadStatus
+
+                    newRoomUploadStatus = new RoomUploadStatus
                     {
                         Message = "Successful uploading",
                         Status = "OK",
                         RoomId = currRoom.Id
-                    });
+                    };
+                    _roomUploadStatusRepository.SetStatus(newRoomUploadStatus);
+                    SendAllObservers(newRoomUploadStatus);
                 }
             }
         }

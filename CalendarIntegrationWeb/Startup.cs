@@ -19,6 +19,7 @@ using CalendarIntegrationWeb.Services.BackgroundServices;
 using CalendarIntegrationWeb.Services.DataUploading;
 using TLConnect;
 using CalendarIntegrationWeb.Observers;
+using Microsoft.AspNetCore.SignalR;
 
 namespace CalendarIntegrationWeb
 {
@@ -58,16 +59,16 @@ namespace CalendarIntegrationWeb
             services.AddScoped<IBookingInfoDataProcessor, BookingInfoDataProcessor>();
             services.AddScoped<IAvailabilityMessageConverter, AvailabilityMessageConverter>();
             services.AddScoped<IAvailabilityInfoSynchronizer, AvailabilityInfoSynchronizer>();
+            services.AddScoped<IRoomUploadStatusRepository, RoomUploadStatusRepository>(); 
             services.AddScoped<IRoomAvailabilityInitializationHandler, RoomAvailabilityInitializationHandler>();
             
             services.AddScoped<ITLConnectService, TLConnectServiceClient>();
             services.AddHostedService<DownloadAvailabilityInfoBackgroundService>();
             services.AddHostedService<UploadAvailabilityInfoBackgroundService>();
 
-            services.AddSingleton<IRoomUploadStatusObserver, RoomUploadStatusObserver>();
             services.AddScoped(serviceProvider  => new List<IObserver<RoomUploadStatus>>
             {
-                serviceProvider.GetService<IRoomUploadStatusObserver>()
+                new RoomUploadStatusObserver(serviceProvider.GetService<IHubContext<RoomUploadStatusHub>>())
             });
 
             services.Configure<DateSynchronizationCommonOptions>(Configuration.GetSection("DateSynchronizationCommonOptions"));

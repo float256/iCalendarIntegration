@@ -24,10 +24,9 @@ export class HotelListComponent {
     hubConnection.start()
       .then(() => console.log('Connection started!'))
       .catch((err: Error) => console.log(`Error while establishing connection: ${err.message}`));
-    hubConnection.on('transferRoomUploadStatus', (roomUploadStatuses: Array<RoomUploadStatus>) => {
-      for (let i = 0; i < roomUploadStatuses.length; i++) {
-        allHotelRoomsStatuses.set(roomUploadStatuses[i].roomId, roomUploadStatuses[i]);
-      }
+    hubConnection.on('transferRoomUploadStatus', (roomUploadStatus: RoomUploadStatus) => {
+      console.log(roomUploadStatus);
+      allHotelRoomsStatuses.set(roomUploadStatus.roomId, roomUploadStatus);
     });
   }
 
@@ -45,7 +44,17 @@ export class HotelListComponent {
       (data: Hotel) => this.hotel = data
     );
     this.http.get(`/api/Room/GetByHotelId/${this.hotelId}`).subscribe(
-      (data: Array<Room>) => this.allHotelRooms = data
+      (data: Array<Room>) => {
+        this.allHotelRooms = data;
+        for (let i = 0; i < this.allHotelRooms.length; i++){
+          let currRoom = this.allHotelRooms[i];
+          this.http.get(`/api/RoomUploadStatus/GetByRoomId/${currRoom.id}`).subscribe(
+            (data: RoomUploadStatus) => {
+              this.allHotelRoomsStatuses.set(currRoom.id, data);
+            }
+          )
+        }
+      }
     );
   }
 
