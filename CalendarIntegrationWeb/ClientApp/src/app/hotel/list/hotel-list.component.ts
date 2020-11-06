@@ -13,68 +13,45 @@ import {HubConnection, HubConnectionBuilder} from "@aspnet/signalr";
 export class HotelListComponent {
   public hotel: Hotel;
   public hotelId: number;
-  public allHotelRooms: Array<Room>;
-  public allHotelRoomsStatuses: Map<number, RoomUploadStatus> = new Map<number, RoomUploadStatus>();
+  public allHotelRooms: Array<Room> = new Array<Room>();
 
   private hubConnection: HubConnection;
 
   constructor(private http: HttpClient, private route: ActivatedRoute) { }
 
-  private setupSignalRConnection(hubConnection: HubConnection, allHotelRoomsStatuses: Map<number, RoomUploadStatus>) {
-    hubConnection.start()
+  private setupSignalRConnection() {
+    this.hubConnection.start()
       .then(() => console.log('Connection started!'))
       .catch((err: Error) => console.log(`Error while establishing connection: ${err.message}`));
-    hubConnection.on('transferRoomUploadStatus', (roomUploadStatus: RoomUploadStatus) => {
-      console.log(roomUploadStatus);
-      allHotelRoomsStatuses.set(roomUploadStatus.roomId, roomUploadStatus);
+    this.hubConnection.on('transferRoomUploadStatus', (roomUploadStatus: RoomUploadStatus) => {
+      let currRoom = this.allHotelRooms.filter((room) => room.id == roomUploadStatus.roomId)[0];
+      let currRoomArrayIdx = this.allHotelRooms.indexOf(currRoom);
+      this.allHotelRooms[currRoomArrayIdx].status = roomUploadStatus.status;
+      this.allHotelRooms[currRoomArrayIdx].statusMessage = roomUploadStatus.message;
+      console.log(roomUploadStatus)
     });
   }
 
   ngOnInit() {
-    this.hubConnection = new HubConnectionBuilder()
-      .withUrl('./RoomUploadStatusHub')
-      .build();
-    this.setupSignalRConnection(this.hubConnection, this.allHotelRoomsStatuses);
-    this.hubConnection.onclose(() => {
-      setTimeout(() => this.setupSignalRConnection(this.hubConnection, this.allHotelRoomsStatuses),3000);
-    });
-
     this.hotelId = this.route.snapshot.params.id;
     this.http.get(`/api/Hotel/${this.hotelId}`).subscribe(
       (data: Hotel) => this.hotel = data
     );
     this.http.get(`/api/Room/GetByHotelId/${this.hotelId}`).subscribe(
-      (data: Array<Room>) => {
-        this.allHotelRooms = data;
-        for (let i = 0; i < this.allHotelRooms.length; i++){
-          let currRoom = this.allHotelRooms[i];
-          this.http.get(`/api/RoomUploadStatus/GetByRoomId/${currRoom.id}`).subscribe(
-            (data: RoomUploadStatus) => {
-              this.allHotelRoomsStatuses.set(currRoom.id, data);
-            }
-          )
-        }
-      }
+      (data: Array<Room>) => this.allHotelRooms = data
     );
+
+    this.hubConnection = new HubConnectionBuilder()
+      .withUrl('./RoomUploadStatusHub')
+      .build();
+    this.setupSignalRConnection();
+    this.hubConnection.onclose(() => {
+      setTimeout(() => this.setupSignalRConnection(),3000);
+    });
   }
 
-  isSuccessStatus(roomId): boolean {
-    return (this.allHotelRoomsStatuses.get(roomId).status.toLowerCase() == 'ok');
+  isSuccessStatus(roomStatus: string): boolean {
+    return (roomStatus.toLowerCase() == 'ok');
   }
 
-  getRoomStatus(roomId: number): string {
-    if(this.allHotelRoomsStatuses.has(roomId)) {
-      return (this.allHotelRoomsStatuses.get(roomId).status);
-    } else {
-      return "";
-    }
-  }
-
-  getRoomStatusMessage(roomId: number): string {
-    if(this.allHotelRoomsStatuses.has(roomId)) {
-      return (this.allHotelRoomsStatuses.get(roomId).message);
-    } else {
-      return "";
-    }
-  }
 }

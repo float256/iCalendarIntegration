@@ -10,10 +10,11 @@ using System.Threading.Tasks;
 using CalendarIntegrationCore.Services.DataProcessing;
 using CalendarIntegrationCore.Services.DataRetrieving;
 using CalendarIntegrationCore.Services.DataSaving;
+using CalendarIntegrationCore.Services.StatusSaving;
 
 namespace CalendarIntegrationCore.Services
 {
-    public class AvailabilityInfoSynchronizer: IAvailabilityInfoSynchronizer, IObservable<RoomUploadStatus>
+    public class AvailabilityInfoSynchronizer: IAvailabilityInfoSynchronizer
     {
         private readonly IHotelRepository _hotelRepository;
         private readonly IRoomRepository _roomRepository;
@@ -27,9 +28,8 @@ namespace CalendarIntegrationCore.Services
         private readonly ICalendarParser _calendarParser;
         private readonly IAvailabilityStatusMessageQueue _queue;
         private readonly ILogger _logger;
-        private readonly IRoomUploadStatusRepository _roomUploadStatusRepository;
-        
-        private readonly List<IObserver<RoomUploadStatus>> _observers;
+
+        private readonly IRoomUploadingStatusSaver _roomUploadingStatusSaver;
         
         public AvailabilityInfoSynchronizer(
             IHotelRepository hotelRepository,
@@ -42,8 +42,7 @@ namespace CalendarIntegrationCore.Services
             ICalendarParser calendarParser,
             ILogger<AvailabilityInfoSynchronizer> logger,
             IAvailabilityMessageConverter messageConverter,
-            IRoomUploadStatusRepository roomUploadStatusRepository,
-            List<IObserver<RoomUploadStatus>> observers)
+            IRoomUploadingStatusSaver roomUploadStatusSaver)
         {
             _hotelRepository = hotelRepository;
             _roomRepository = roomRepository;
@@ -55,8 +54,7 @@ namespace CalendarIntegrationCore.Services
             _logger = logger;
             _queue = queue;
             _messageConverter = messageConverter;
-            _roomUploadStatusRepository = roomUploadStatusRepository;
-            _observers = observers;
+            _roomUploadingStatusSaver = roomUploadStatusSaver;
         }
 
         /// <summary>
@@ -84,15 +82,7 @@ namespace CalendarIntegrationCore.Services
                     }
                     catch (HttpRequestException exception)
                     {
-                        newRoomUploadStatus= new RoomUploadStatus
-                        {
-                            Message = exception.Message,
-                            Status = "Calendar Downloading Error",
-                            RoomId = currRoom.Id
-                        };
-                        
-                        SendAllObservers(newRoomUploadStatus);
-                        _roomUploadStatusRepository.SetStatus(newRoomUploadStatus);
+                        _roomUploadingStatusSaver.SetRoomStatus(currRoom.Id, "Calendar Downloading Error", exception.Message);
                         _logger.LogError(exception, "Error occurred while trying to get the calendar from the URL");
                         continue;
                     }
@@ -105,15 +95,7 @@ namespace CalendarIntegrationCore.Services
                     }
                     catch (CalendarParserException exception)
                     {
-                        newRoomUploadStatus = new RoomUploadStatus
-                        {
-                            Message = exception.Message,
-                            Status = "Calendar Parsing Error",
-                            RoomId = currRoom.Id
-                        };
-                        
-                        _roomUploadStatusRepository.SetStatus(newRoomUploadStatus);
-                        SendAllObservers(newRoomUploadStatus);
+                        _roomUploadingStatusSaver.SetRoomStatus(currRoom.Id, "Calendar Parsing Error", exception.Message);
                         _logger.LogError(exception, "Error occurred while trying to parse the calendar");
                         continue;
                     }
@@ -125,48 +107,7 @@ namespace CalendarIntegrationCore.Services
                     _infoSaver.SaveChanges(changes);
                     _queue.EnqueueMultiple(availabilityStatusMessages);
 
-                    newRoomUploadStatus = new RoomUploadStatus
-                    {
-                        Message = "Successful uploading",
-                        Status = "OK",
-                        RoomId = currRoom.Id
-                    };
-                    _roomUploadStatusRepository.SetStatus(newRoomUploadStatus);
-                    SendAllObservers(newRoomUploadStatus);
-                }
-            }
-        }
-
-        public IDisposable Subscribe(IObserver<RoomUploadStatus> observer)
-        {
-            _observers.Add(observer);
-            return new Unsubscriber(_observers, observer);    
-        }
-
-        private void SendAllObservers(RoomUploadStatus newRoomUploadStatus)
-        {
-            foreach (var observer in _observers)
-            {
-                observer.OnNext(newRoomUploadStatus);
-            }
-        }
-        
-        private class Unsubscriber : IDisposable
-        {
-            private readonly List<IObserver<RoomUploadStatus>> _observers;
-            private readonly IObserver<RoomUploadStatus> _observer;
-
-            public Unsubscriber(List<IObserver<RoomUploadStatus>> observers, IObserver<RoomUploadStatus> observer)
-            {
-                this._observers = observers;
-                this._observer = observer;
-            }
-
-            public void Dispose()
-            {
-                if (_observer != null)
-                {
-                    _observers.Remove(_observer);
+                    _roomUploadingStatusSaver.SetRoomStatus(currRoom.Id, "OK",  "Successful uploading");
                 }
             }
         }

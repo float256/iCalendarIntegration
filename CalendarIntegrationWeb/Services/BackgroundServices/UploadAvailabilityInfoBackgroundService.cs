@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services.DataProcessing;
 using CalendarIntegrationCore.Services.DataSaving;
+using CalendarIntegrationCore.Services.Repositories;
+using CalendarIntegrationCore.Services.StatusSaving;
 using CalendarIntegrationWeb.Services.DataUploading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -46,6 +48,8 @@ namespace CalendarIntegrationWeb.Services.BackgroundServices
                         .GetRequiredService<ITodayBoundary>();
                     IAvailabilityInfoSender infoSender = scope.ServiceProvider.
                         GetRequiredService<IAvailabilityInfoSender>();
+                    IRoomUploadingStatusSaver roomUploadingStatusSaver = scope.ServiceProvider.
+                        GetRequiredService<IRoomUploadingStatusSaver>(); 
                     
                     List<AvailabilityStatusMessage> availMessages = queue.PeekMultiple(_dataPackageSize).Select(
                         availMessage =>
@@ -64,6 +68,11 @@ namespace CalendarIntegrationWeb.Services.BackgroundServices
                     }
                     catch (Exception exception)
                     {
+                        foreach (int roomId in availMessages.Select(elem => elem.RoomId).Distinct())
+                        {
+                            roomUploadingStatusSaver.SetRoomStatus(roomId, "TLConnect Sending error",
+                                exception.Message);
+                        }
                         _logger.LogError(exception, "Error occurred while trying to send data to TLConnect");
                     }
                 }
