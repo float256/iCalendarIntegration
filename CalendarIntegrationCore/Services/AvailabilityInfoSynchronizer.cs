@@ -69,7 +69,6 @@ namespace CalendarIntegrationCore.Services
                 foreach (Room currRoom in _roomRepository.GetByHotelId(currHotel.Id))
                 {
                     string calendar;
-                    RoomUploadStatus newRoomUploadStatus;
 
                     if (cancelToken.IsCancellationRequested)
                     {
@@ -107,7 +106,7 @@ namespace CalendarIntegrationCore.Services
                     _infoSaver.SaveChanges(changes);
                     _queue.EnqueueMultiple(availabilityStatusMessages);
 
-                    _roomUploadingStatusSaver.SetRoomStatus(currRoom.Id, "OK",  "Successful uploading");
+                    _roomUploadingStatusSaver.SetRoomStatus(currRoom.Id, "OK", "Successful uploading");
                 }
             }
         }

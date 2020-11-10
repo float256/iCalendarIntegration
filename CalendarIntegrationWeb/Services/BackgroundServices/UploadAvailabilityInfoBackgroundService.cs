@@ -70,7 +70,9 @@ namespace CalendarIntegrationWeb.Services.BackgroundServices
                     {
                         foreach (int roomId in availMessages.Select(elem => elem.RoomId).Distinct())
                         {
-                            roomUploadingStatusSaver.SetRoomStatus(roomId, "TLConnect Sending error",
+                            roomUploadingStatusSaver.SetRoomStatus(
+                                roomId, 
+                                "TLConnect Sending error",
                                 exception.Message);
                         }
                         _logger.LogError(exception, "Error occurred while trying to send data to TLConnect");

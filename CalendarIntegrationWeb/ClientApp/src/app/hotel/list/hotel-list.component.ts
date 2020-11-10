@@ -1,10 +1,13 @@
 import { HttpClient } from "@angular/common/http";
-import { ActivatedRoute } from "@angular/router";
-import { Component, OnInit } from '@angular/core';
+import {ActivatedRoute, NavigationEnd, NavigationStart, Router} from "@angular/router";
+import {Component, HostListener, OnInit} from '@angular/core';
 import { Room } from "../../shared/models/room.model";
 import { Hotel } from "../../shared/models/hotel.model";
 import {RoomUploadStatus} from "../../shared/models/roomuploadstatus.model";
 import {HubConnection, HubConnectionBuilder} from "@aspnet/signalr";
+import {Subscription} from "rxjs";
+
+export let browserRefresh: boolean = false;
 
 @Component({
   selector: 'app-hotel-list',
@@ -16,8 +19,20 @@ export class HotelListComponent {
   public allHotelRooms: Array<Room> = new Array<Room>();
 
   private hubConnection: HubConnection;
+  private isOpenedConnection: boolean;
 
-  constructor(private http: HttpClient, private route: ActivatedRoute) { }
+  constructor(private http: HttpClient, private route: ActivatedRoute, private router: Router) {
+    this.isOpenedConnection = true;
+    this.router.events.subscribe(async (ev) => {
+      if ((ev instanceof NavigationEnd) && (this.hubConnection !== undefined)) {
+        this.isOpenedConnection = false;
+        await this.hubConnection.stop();
+        this.hubConnection = undefined;
+        console.log('Connection closed!');
+      }
+    });
+  }
+
 
   private setupSignalRConnection() {
     this.hubConnection.start()
@@ -28,7 +43,6 @@ export class HotelListComponent {
       let currRoomArrayIdx = this.allHotelRooms.indexOf(currRoom);
       this.allHotelRooms[currRoomArrayIdx].status = roomUploadStatus.status;
       this.allHotelRooms[currRoomArrayIdx].statusMessage = roomUploadStatus.message;
-      console.log(roomUploadStatus)
     });
   }
 
@@ -46,7 +60,9 @@ export class HotelListComponent {
       .build();
     this.setupSignalRConnection();
     this.hubConnection.onclose(() => {
-      setTimeout(() => this.setupSignalRConnection(),3000);
+      if (this.isOpenedConnection) {
+        setTimeout(() => this.setupSignalRConnection(), 3000);
+      }
     });
   }
 
