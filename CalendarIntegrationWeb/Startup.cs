@@ -8,17 +8,19 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Collections.Generic;
 using CalendarIntegrationCore.Models;
 using CalendarIntegrationCore.Services.DataProcessing;
 using CalendarIntegrationCore.Services.DataRetrieving;
 using CalendarIntegrationCore.Services.DataSaving;
 using CalendarIntegrationCore.Services.InitializationHandlers;
 using CalendarIntegrationCore.Services.StatusSaving;
-using Microsoft.Extensions.Logging;
-using CalendarIntegrationWeb.Services;
+using CalendarIntegrationWeb.Hubs;
 using CalendarIntegrationWeb.Services.BackgroundServices;
 using CalendarIntegrationWeb.Services.DataUploading;
 using TLConnect;
+using CalendarIntegrationWeb.Observers;
+using Microsoft.AspNetCore.SignalR;
 
 namespace CalendarIntegrationWeb
 {
@@ -51,8 +53,8 @@ namespace CalendarIntegrationWeb
             services.AddScoped<ISoapRequestCreator, SoapRequestCreator>();
             services.AddScoped<IAvailabilityStatusMessageQueue, AvailabilityStatusMessageQueue>();
             services.AddScoped<ITodayBoundary, TodayBoundary>();
+
             services.AddScoped<IRoomUploadingStatusSaver, RoomUploadingStatusSaver>();
-            
             services.AddScoped<IAvailabilityInfoReceiver, AvailabilityInfoReceiver>();
             services.AddScoped<IBookingInfoSaver, BookingInfoSaver>();
             services.AddScoped<IAvailabilityInfoSender, AvailabilityInfoSender>();
@@ -65,16 +67,23 @@ namespace CalendarIntegrationWeb
             services.AddScoped<ITLConnectService, TLConnectServiceClient>();
             services.AddHostedService<DownloadAvailabilityInfoBackgroundService>();
             services.AddHostedService<UploadAvailabilityInfoBackgroundService>();
-  
+            
+            services.AddScoped(serviceProvider  => new List<IObserver<RoomUploadStatus>>
+            {
+                new RoomUploadStatusObserver(serviceProvider.GetService<IHubContext<RoomUploadStatusHub>>())
+            });
+
             services.Configure<DateSynchronizationCommonOptions>(Configuration.GetSection("DateSynchronizationCommonOptions"));
             services.Configure<DownloadAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("DownloadAvailabilityInfoBackgroundServiceOptions"));
             services.Configure<UploadAvailabilityInfoBackgroundServiceOptions>(Configuration.GetSection("UploadAvailabilityInfoBackgroundServiceOptions"));
-
+            
             services.AddScoped<ITLConnectService, TLConnectServiceClient>(
                 sp => new TLConnectServiceClient(
                     TLConnectServiceClient.EndpointConfiguration.BasicHttpBinding_ITLConnectService,
                     Configuration.GetSection("TLConnectServiceURL").Value));
             services.AddHttpClient();
+
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -96,20 +105,20 @@ namespace CalendarIntegrationWeb
                 app.UseSpaStaticFiles();
             }
 
+            
             app.UseRouting();
+            app.UseWebSockets();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
+                endpoints.MapHub<RoomUploadStatusHub>( "/RoomUploadStatusHub" );
             });
 
             app.UseSpa(spa =>
             {
-                // To learn more about options for serving an Angular SPA from ASP.NET Core,
-                // see https://go.microsoft.com/fwlink/?linkid=864501
-
                 spa.Options.SourcePath = "ClientApp";
 
                 if (!env.IsProduction())

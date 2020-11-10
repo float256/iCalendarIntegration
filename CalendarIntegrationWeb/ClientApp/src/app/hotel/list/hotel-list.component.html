@@ -36,7 +36,7 @@
       {{ currRoom?.tlApiCode }}
     </p>
     <button type="button" *ngIf="currRoom?.status.length != 0"
-            class="btn btn-white {{ isSuccessStatus(currRoom) ? 'text-success' : 'text-danger' }} shadow-none w-100 border-right pt-2 my-0 border-right d-inline-block text-truncate"
+            class="btn btn-white {{ isSuccessStatus(currRoom?.status) ? 'text-success' : 'text-danger' }} shadow-none w-100 border-right pt-2 my-0 border-right d-inline-block text-truncate"
             data-toggle="modal"
             [attr.data-target]="'#room' + currRoom?.id.toString() + 'UploadIndex'">
       {{ currRoom?.status }}
@@ -66,12 +66,12 @@
           </div>
           <div class="modal-body">
             <p class="h6">Status:&emsp;&emsp;
-              <span class="{{ isSuccessStatus(currRoom) ? 'text-success' : 'text-danger' }}">
+              <span class="{{ isSuccessStatus(currRoom?.status) ? 'text-success' : 'text-danger' }}">
                 {{ currRoom?.status }}
               </span>
             </p>
             <p class="h6">Status message:
-              <span class="{{ isSuccessStatus(currRoom) ? 'text-success' : 'text-danger' }}">
+              <span class="{{ isSuccessStatus(currRoom?.status) ? 'text-success' : 'text-danger' }}">
                 {{ currRoom?.statusMessage }}
               </span>
             </p>

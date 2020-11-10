@@ -28,6 +28,16 @@ function CreatePackage {
         throw $LASTEXITCODE
     }
 
+    cd "$basePath/CalendarIntegrationWeb/ClientApp/src"
+    
+    cmd.exe /c "npm install"
+
+    if ($LASTEXITCODE -ne "0") {
+        throw $LASTEXITCODE
+    }
+
+    cd "../../../"
+
     $build = "dotnet restore $basePath --packages $basePath\packages\ --source $nugetSource"
     cmd.exe /c $build
 
@@ -35,7 +45,10 @@ function CreatePackage {
         throw $LASTEXITCODE
     }
 
+    Write-Host "Run build SF project: $sfProjectFile"
+
     $build = "dotnet msbuild $sfProjectFile /nr:false /p:VisualStudioVersion=$visualStudioVersion /t:Package /p:Configuration=Release"
+
     $build += " || exit 1"
     cmd.exe /c $build
 

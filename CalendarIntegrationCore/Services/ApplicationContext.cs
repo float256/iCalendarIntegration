@@ -23,8 +23,8 @@ namespace CalendarIntegrationCore.Services
             builder.Entity<Hotel>().ToTable("hotel");
             builder.Entity<Room>().ToTable("room");
             builder.Entity<BookingInfo>().ToTable("booking_info");
-            builder.Entity<RoomUploadStatus>().ToTable("room_upload_status");
             builder.Entity<AvailabilityStatusMessage>().ToTable("availability_status_message");
+            builder.Entity<RoomUploadStatus>().ToTable("room_upload_status");
             builder.Entity<AvailabilityStatusMessage>().Property(c => c.State).HasConversion(
                 entity => (int) entity,
                 entity => (BookingLimitType) entity);

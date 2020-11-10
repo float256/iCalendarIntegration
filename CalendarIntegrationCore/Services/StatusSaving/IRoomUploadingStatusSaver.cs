@@ -1,6 +1,9 @@
-﻿namespace CalendarIntegrationCore.Services.StatusSaving
+﻿using System;
+using CalendarIntegrationCore.Models;
+
+namespace CalendarIntegrationCore.Services.StatusSaving
 {
-    public interface IRoomUploadingStatusSaver
+    public interface IRoomUploadingStatusSaver: IObservable<RoomUploadStatus>
     {
         void SetRoomStatus(int roomId, string status, string message);
     }

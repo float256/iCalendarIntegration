@@ -6,14 +6,14 @@ namespace CalendarIntegrationCore.Services.Repositories
 {
     public class RoomUploadStatusRepository: IRoomUploadStatusRepository
     {
-        
+
         private readonly ApplicationContext _context;
-        
+
         public RoomUploadStatusRepository(ApplicationContext context)
         {
             _context = context;
         }
-        
+
         public RoomUploadStatus Get(int id)
         {
             RoomUploadStatus roomUploadStatus = _context.RoomUploadStatusSet.SingleOrDefault(x => x.Id == id);
@@ -34,7 +34,7 @@ namespace CalendarIntegrationCore.Services.Repositories
             }
             return roomUploadStatus;
         }
-
+        
         public void SetStatus(RoomUploadStatus newStatus)
         {
             RoomUploadStatus statusFromDb = GetByRoomId(newStatus.RoomId);
@@ -50,7 +50,7 @@ namespace CalendarIntegrationCore.Services.Repositories
             }
             _context.SaveChanges();
         }
-        
+
         public void DeleteByRoomId(int roomId)
         {
             _context.RoomUploadStatusSet.RemoveRange(_context.RoomUploadStatusSet.Where(
@@ -67,4 +67,4 @@ namespace CalendarIntegrationCore.Services.Repositories
             };
         }
     }
-}
+} 
