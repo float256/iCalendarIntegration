@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CalendarIntegrationCore.Services.DataProcessing;
@@ -29,8 +28,9 @@ namespace CalendarIntegrationCore.Services
         private readonly ICalendarParser _calendarParser;
         private readonly IAvailabilityStatusMessageQueue _queue;
         private readonly ILogger _logger;
-        private readonly IRoomUploadingStatusSaver _roomUploadingStatusSaver;
 
+        private readonly IRoomUploadingStatusSaver _roomUploadingStatusSaver;
+        
         public AvailabilityInfoSynchronizer(
             IHotelRepository hotelRepository,
             IRoomRepository roomRepository,
@@ -42,7 +42,7 @@ namespace CalendarIntegrationCore.Services
             ICalendarParser calendarParser,
             ILogger<AvailabilityInfoSynchronizer> logger,
             IAvailabilityMessageConverter messageConverter,
-            IRoomUploadingStatusSaver roomUploadingStatusSaver)
+            IRoomUploadingStatusSaver roomUploadStatusSaver)
         {
             _hotelRepository = hotelRepository;
             _roomRepository = roomRepository;
@@ -54,7 +54,7 @@ namespace CalendarIntegrationCore.Services
             _logger = logger;
             _queue = queue;
             _messageConverter = messageConverter;
-            _roomUploadingStatusSaver = roomUploadingStatusSaver;
+            _roomUploadingStatusSaver = roomUploadStatusSaver;
         }
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace CalendarIntegrationCore.Services
                             .OrderBy(elem => elem.StartDate).ToList();
                     _infoSaver.SaveChanges(changes);
                     _queue.EnqueueMultiple(availabilityStatusMessages);
-                    
+
                     _roomUploadingStatusSaver.SetRoomStatus(currRoom.Id, "OK", "Successful uploading");
                 }
             }

@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using CalendarIntegrationCore.Models;
-using CalendarIntegrationCore.Services;
-using CalendarIntegrationCore.Services.DataSaving;
 using CalendarIntegrationCore.Services.InitializationHandlers;
 using CalendarIntegrationCore.Services.Repositories;
 using CalendarIntegrationCore.Services.StatusSaving;
@@ -45,9 +41,9 @@ namespace CalendarIntegrationWeb.Controllers
         public ActionResult<RoomDto> Get(int id)
         {
             Room room = _roomRepository.Get(id);
+            RoomUploadStatus roomStatus = _roomUploadStatusRepository.GetByRoomId(room.Id);
             if (room != default)
             {
-                RoomUploadStatus roomStatus = _roomUploadStatusRepository.GetByRoomId(room.Id);
                 return Ok(new RoomDto
                 {
                     Id = room.Id,
@@ -89,21 +85,20 @@ namespace CalendarIntegrationWeb.Controllers
         [HttpGet("GetAll")]
         public ActionResult<List<RoomDto>> GetAll()
         {
-            return _roomRepository.GetAll().Select(
-                room =>
+            return _roomRepository.GetAll().Select(room =>
+            {
+                RoomUploadStatus currRoomStatus = _roomUploadStatusRepository.GetByRoomId(room.Id);
+                return new RoomDto
                 {
-                    RoomUploadStatus currRoomStatus = _roomUploadStatusRepository.GetByRoomId(room.Id);
-                    return new RoomDto
-                    {
-                        Id = room.Id,
-                        HotelId = room.HotelId,
-                        Name = room.Name,
-                        TLApiCode = room.TLApiCode,
-                        Url = room.Url,
-                        Status = currRoomStatus.Status,
-                        StatusMessage = currRoomStatus.Message
-                    };
-                }).ToList();
+                    Id = room.Id,
+                    HotelId = room.HotelId,
+                    Name = room.Name,
+                    TLApiCode = room.TLApiCode,
+                    Url = room.Url,
+                    Status = currRoomStatus.Status,
+                    StatusMessage = currRoomStatus.Message
+                };
+            }).ToList();
         }
 
         [HttpPost("Add")]
@@ -159,7 +154,7 @@ namespace CalendarIntegrationWeb.Controllers
             }
             catch (RoomAvailabilityInitializationHandlerException exception)
             {
-                _roomUploadingStatusSaver.SetRoomStatus(newRoom.Id, "Add Availability Message Error", exception.Message);
+                _roomUploadingStatusSaver.SetRoomStatus(roomDto.Id, "Add Availability Message Error", exception.Message);
                 _logger.LogError(exception, "Error occurred while trying to adding availability messages");
             }
         }
